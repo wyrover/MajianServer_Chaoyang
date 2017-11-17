@@ -47,9 +47,9 @@ CGameServiceManager::CGameServiceManager()
 	m_GameServiceAttrib.dwServerVersion=VERSION_SERVER;
 	m_GameServiceAttrib.dwClientVersion=VERSION_CLIENT;
 	lstrcpyn(m_GameServiceAttrib.szGameName,GAME_NAME,CountArray(m_GameServiceAttrib.szGameName));
-	lstrcpyn(m_GameServiceAttrib.szDataBaseName,TEXT("QPSparrowHZHDB"),CountArray(m_GameServiceAttrib.szDataBaseName));
-	lstrcpyn(m_GameServiceAttrib.szClientEXEName,TEXT("SparrowHZH.EXE"),CountArray(m_GameServiceAttrib.szClientEXEName));
-	lstrcpyn(m_GameServiceAttrib.szServerDLLName,TEXT("SparrowHZHServer.DLL"),CountArray(m_GameServiceAttrib.szServerDLLName));
+	lstrcpyn(m_GameServiceAttrib.szDataBaseName,TEXT("QPSparrowCHYDB"),CountArray(m_GameServiceAttrib.szDataBaseName));
+	lstrcpyn(m_GameServiceAttrib.szClientEXEName,TEXT("SparrowCHY.EXE"),CountArray(m_GameServiceAttrib.szClientEXEName));
+	lstrcpyn(m_GameServiceAttrib.szServerDLLName,TEXT("SparrowCHYServer.DLL"),CountArray(m_GameServiceAttrib.szServerDLLName));
 
 	return;
 }

@@ -37,7 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../../../../ÔËÐÐ/Debug/Ansi/SparrowHZHServer.dll"
+				OutputFile="../../../../ÔËÐÐ/Debug/Ansi/SparrowCHYServer.dll"
 				LinkIncremental="2"
 				ModuleDefinitionFile=".\GameServer.def"
 				GenerateDebugInformation="TRUE"
@@ -93,7 +93,7 @@ copy /y ..\..\..\..\ÔËÐÐ\Debug\Ansi\$(TargetFileName) ..\..\..\·¢²¼×é¼þ\·þÎñÆ÷×é
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../../../../ÔËÐÐ/Release/Ansi/SparrowHZHServer.dll"
+				OutputFile="../../../../ÔËÐÐ/Release/Ansi/SparrowCHYServer.dll"
 				LinkIncremental="1"
 				ModuleDefinitionFile=".\GameServer.def"
 				GenerateDebugInformation="TRUE"
@@ -154,7 +154,7 @@ copy /y ..\..\..\..\ÔËÐÐ\Release\Ansi\$(TargetFileName) ..\..\..\·¢²¼×é¼þ\·þÎñÆ÷
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../../../../ÔËÐÐ/Debug/Unicode/SparrowHZHServer.dll"
+				OutputFile="../../../../ÔËÐÐ/Debug/Unicode/SparrowCHYServer.dll"
 				LinkIncremental="2"
 				ModuleDefinitionFile=".\GameServer.def"
 				GenerateDebugInformation="TRUE"
@@ -210,7 +210,7 @@ copy /y ..\..\..\..\ÔËÐÐ\Debug\Unicode\$(TargetFileName) ..\..\..\·¢²¼×é¼þ\·þÎñÆ
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../../../../ÔËÐÐ/Release/Unicode/SparrowHZHServer.dll"
+				OutputFile="../../../../ÔËÐÐ/Release/Unicode/SparrowCHYServer.dll"
 				LinkIncremental="1"
 				ModuleDefinitionFile=".\GameServer.def"
 				GenerateDebugInformation="TRUE"
