@@ -12,11 +12,23 @@
 	#define ANDROID_SERVICE_DLL_NAME	TEXT("SparrowDZAndroidServiceD.dll")	//组件名字
 #endif
 
+
+
+CStringA guid_string(GUID guid) {
+	CStringA str;
+	str.Format("Guid = {%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX}", 
+      guid.Data1, guid.Data2, guid.Data3, 
+      guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
+      guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+	return str;
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 
 //构造函数
 CGameServiceManager::CGameServiceManager()
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//控件变量
 	m_hDllInstance=NULL;
 	m_pDlgCustomRule=NULL;
@@ -45,6 +57,7 @@ CGameServiceManager::CGameServiceManager()
 //析构函数
 CGameServiceManager::~CGameServiceManager()
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//删除对象
 	SafeDelete(m_pDlgCustomRule);
 
@@ -61,6 +74,7 @@ CGameServiceManager::~CGameServiceManager()
 //接口查询
 VOID * CGameServiceManager::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	QUERYINTERFACE(IGameServiceManager,Guid,dwQueryVer);
 	QUERYINTERFACE(IGameServiceCustomRule,Guid,dwQueryVer);
 	QUERYINTERFACE_IUNKNOWNEX(IGameServiceManager,Guid,dwQueryVer);
@@ -70,6 +84,10 @@ VOID * CGameServiceManager::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 //创建桌子
 VOID * CGameServiceManager::CreateTableFrameSink(REFGUID Guid, DWORD dwQueryVer)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	OutputDebugStringA(" > " + guid_string(Guid));	
+	//CTraceService::TraceString(str,TraceLevel_Debug);
+
 	//变量定义
 	CTableFrameSink * pTableFrameSink=NULL;
 
@@ -96,6 +114,7 @@ VOID * CGameServiceManager::CreateTableFrameSink(REFGUID Guid, DWORD dwQueryVer)
 //创建机器
 VOID * CGameServiceManager::CreateAndroidUserItemSink(REFGUID Guid, DWORD dwQueryVer)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//try
 	//{
 	//	//加载模块
@@ -141,12 +160,14 @@ VOID * CGameServiceManager::CreateAndroidUserItemSink(REFGUID Guid, DWORD dwQuer
 //创建数据
 VOID * CGameServiceManager::CreateGameDataBaseEngineSink(REFGUID Guid, DWORD dwQueryVer)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	return NULL;
 }
 
 //组件属性
 bool CGameServiceManager::GetServiceAttrib(tagGameServiceAttrib & GameServiceAttrib)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//设置变量
 	GameServiceAttrib=m_GameServiceAttrib;
 
@@ -156,6 +177,7 @@ bool CGameServiceManager::GetServiceAttrib(tagGameServiceAttrib & GameServiceAtt
 //调整参数
 bool CGameServiceManager::RectifyParameter(tagGameServiceOption & GameServiceOption)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//单元积分
 	GameServiceOption.lCellScore=__max(1L,GameServiceOption.lCellScore);
 	
@@ -201,6 +223,7 @@ bool CGameServiceManager::RectifyParameter(tagGameServiceOption & GameServiceOpt
 //获取配置
 bool CGameServiceManager::SaveCustomRule(LPBYTE pcbCustomRule, WORD wCustonSize)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//效验状态
 	ASSERT(m_pDlgCustomRule!=NULL);
 	if (m_pDlgCustomRule==NULL) return false;
@@ -221,6 +244,7 @@ bool CGameServiceManager::SaveCustomRule(LPBYTE pcbCustomRule, WORD wCustonSize)
 //默认配置
 bool CGameServiceManager::DefaultCustomRule(LPBYTE pcbCustomRule, WORD wCustonSize)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//变量定义
 	ASSERT(wCustonSize>=sizeof(tagCustomRule));
 	tagCustomRule * pCustomRule=(tagCustomRule *)pcbCustomRule;
@@ -239,6 +263,7 @@ bool CGameServiceManager::DefaultCustomRule(LPBYTE pcbCustomRule, WORD wCustonSi
 //创建窗口
 HWND CGameServiceManager::CreateCustomRule(CWnd * pParentWnd, CRect rcCreate, LPBYTE pcbCustomRule, WORD wCustonSize)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//创建窗口
 	if (m_pDlgCustomRule==NULL)
 	{
@@ -269,6 +294,7 @@ HWND CGameServiceManager::CreateCustomRule(CWnd * pParentWnd, CRect rcCreate, LP
 }
 
 //////////////////////////////////////////////////////////////////////////////////
+
 
 //建立对象函数
 extern "C" __declspec(dllexport) VOID * CreateGameServiceManager(const GUID & Guid, DWORD dwInterfaceVer)

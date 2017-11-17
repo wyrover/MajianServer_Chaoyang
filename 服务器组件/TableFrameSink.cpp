@@ -11,6 +11,7 @@
 //构造函数
 CTableFrameSink::CTableFrameSink()
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	m_wPlayerCount = GAME_PLAYER;
 
 	//组件变量
@@ -107,12 +108,13 @@ CTableFrameSink::CTableFrameSink()
 //析构函数
 CTableFrameSink::~CTableFrameSink()
 {
-
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 }
 
 //接口查询
 VOID * CTableFrameSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	QUERYINTERFACE(ITableFrameSink,Guid,dwQueryVer);
 	QUERYINTERFACE(ITableUserAction,Guid,dwQueryVer);
 	QUERYINTERFACE_IUNKNOWNEX(ITableFrameSink,Guid,dwQueryVer);
@@ -122,6 +124,7 @@ VOID * CTableFrameSink::QueryInterface(REFGUID Guid, DWORD dwQueryVer)
 //复位桌子
 VOID CTableFrameSink::RepositionSink()
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//游戏变量
 	m_wSiceCount = 0;
 	m_wCurrentUser = INVALID_CHAIR;
@@ -204,6 +207,7 @@ VOID CTableFrameSink::RepositionSink()
 //配置桌子
 bool CTableFrameSink::Initialization(IUnknownEx * pIUnknownEx)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//查询接口
 	m_pITableFrame=QUERY_OBJECT_PTR_INTERFACE(pIUnknownEx,ITableFrame);
 
@@ -235,12 +239,14 @@ bool CTableFrameSink::Initialization(IUnknownEx * pIUnknownEx)
 //消费能力
 SCORE CTableFrameSink::QueryConsumeQuota(IServerUserItem * pIServerUserItem)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	return 0L;
 }
 
 //最少积分
 SCORE CTableFrameSink::QueryLessEnterScore(WORD wChairID, IServerUserItem * pIServerUserItem)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//金币游戏
 	if (m_pGameServiceOption->wServerType&(GAME_GENRE_GOLD|SCORE_GENRE_POSITIVE))
 	{		
@@ -252,6 +258,7 @@ SCORE CTableFrameSink::QueryLessEnterScore(WORD wChairID, IServerUserItem * pISe
 //游戏开始
 bool CTableFrameSink::OnEventGameStart()
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//设置状态
 	m_pITableFrame->SetGameStatus(GAME_SCENE_PLAY);
 
@@ -447,6 +454,7 @@ bool CTableFrameSink::OnEventGameStart()
 //游戏结束
 bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pIServerUserItem, BYTE cbReason)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	if((m_pGameServiceOption->wServerType & GAME_GENRE_MATCH) != 0)
 		m_pITableFrame->KillGameTimer(IDI_CHECK_TABLE);
 	switch (cbReason)
@@ -612,6 +620,7 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 //发送场景
 bool CTableFrameSink::OnEventSendGameScene(WORD wChairID, IServerUserItem * pIServerUserItem, BYTE cbGameStatus, bool bSendSecret)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	switch (cbGameStatus)
 	{
 	case GAME_SCENE_FREE:	//空闲状态
@@ -730,6 +739,7 @@ bool CTableFrameSink::OnEventSendGameScene(WORD wChairID, IServerUserItem * pISe
 //时间事件
 bool CTableFrameSink::OnTimerMessage(DWORD wTimerID, WPARAM wBindParam)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	if((m_pGameServiceOption->wServerType&GAME_GENRE_MATCH)!=0)
 	{
 		if(wTimerID==IDI_CHECK_TABLE)
@@ -806,6 +816,10 @@ bool CTableFrameSink::OnUserScroeNotify(WORD wChairID, IServerUserItem * pIServe
 //游戏消息
 bool CTableFrameSink::OnGameMessage(WORD wSubCmdID, VOID * pData, WORD wDataSize, IServerUserItem * pIServerUserItem)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	CStringA str;
+	str.Format("\nwSubCmdID:%d, wDataSize:%d", wSubCmdID, wDataSize);
+	OutputDebugStringA(str);
 	m_cbWaitTime = 0;
 	switch (wSubCmdID)
 	{
@@ -899,12 +913,14 @@ bool CTableFrameSink::OnFrameMessage(WORD wSubCmdID, VOID * pData, WORD wDataSiz
 //用户坐下
 bool CTableFrameSink::OnActionUserSitDown(WORD wChairID, IServerUserItem * pIServerUserItem, bool bLookonUser)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//获取房卡规则
 	BYTE* pSetInfo = m_pITableFrame->GetGameRule();
 	if(pSetInfo[0] == 1)
 	{
 		m_cbPlayerCount = pSetInfo[1];
 		m_cbMaCount = pSetInfo[2];
+		//test = pSetInfo[3];
 	}
 
 
@@ -923,6 +939,7 @@ bool CTableFrameSink::OnActionUserSitDown(WORD wChairID, IServerUserItem * pISer
 //用户起立
 bool CTableFrameSink::OnActionUserStandUp(WORD wChairID, IServerUserItem * pIServerUserItem, bool bLookonUser)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//历史积分
 	if (bLookonUser==false)
 	{
@@ -946,6 +963,7 @@ bool CTableFrameSink::OnActionUserStandUp(WORD wChairID, IServerUserItem * pISer
 //用户出牌
 bool CTableFrameSink::OnUserOutCard(WORD wChairID, BYTE cbCardData,bool bSysOut/*=false*/)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//效验状态
 	ASSERT(m_pITableFrame->GetGameStatus() == GAME_SCENE_PLAY);
 	if (m_pITableFrame->GetGameStatus() != GAME_SCENE_PLAY) return true;
@@ -1028,6 +1046,7 @@ bool CTableFrameSink::OnUserOutCard(WORD wChairID, BYTE cbCardData,bool bSysOut/
 //用户操作
 bool CTableFrameSink::OnUserOperateCard(WORD wChairID, BYTE cbOperateCode, BYTE cbOperateCard[3])
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//效验状态
 	ASSERT(m_pITableFrame->GetGameStatus() == GAME_SCENE_PLAY);
 	if (m_pITableFrame->GetGameStatus() != GAME_SCENE_PLAY) return true;
@@ -1486,6 +1505,7 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, BYTE cbOperateCode, BYTE 
 //用户听牌
 bool CTableFrameSink::OnUserListenCard(WORD wChairID, bool bListenCard)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	if(bListenCard)
 	{
 		ASSERT(!m_bTing[wChairID]);
@@ -1542,6 +1562,7 @@ bool CTableFrameSink::OnUserListenCard(WORD wChairID, bool bListenCard)
 //用户托管
 bool CTableFrameSink::OnUserTrustee(WORD wChairID, bool bTrustee)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//效验状态
 	ASSERT((wChairID < m_cbPlayerCount));
 	if ((wChairID>=m_cbPlayerCount)) return false;
@@ -1589,6 +1610,7 @@ bool CTableFrameSink::OnUserTrustee(WORD wChairID, bool bTrustee)
 //用户补牌
 bool CTableFrameSink::OnUserReplaceCard(WORD wChairID, BYTE cbCardData)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//错误断言
 	ASSERT(m_GameLogic.IsValidCard(cbCardData));
 	//效验参数
@@ -1624,6 +1646,7 @@ bool CTableFrameSink::OnUserReplaceCard(WORD wChairID, BYTE cbCardData)
 //发送扑克
 bool CTableFrameSink::OnUserSendCard(BYTE cbCardCount, WORD wBankerUser, BYTE cbCardData[], BYTE cbControlGameCount)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 #ifdef  CARD_DISPATCHER_CONTROL
 	ASSERT(cbCardCount == MAX_REPERTORY && wBankerUser < GAME_PLAYER);
 	if(cbCardCount != MAX_REPERTORY || wBankerUser >= GAME_PLAYER) return false;
@@ -1642,6 +1665,7 @@ bool CTableFrameSink::OnUserSendCard(BYTE cbCardCount, WORD wBankerUser, BYTE cb
 //发送操作
 bool CTableFrameSink::SendOperateNotify()
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//发送提示
 	for (WORD i=0;i<m_cbPlayerCount;i++)
 	{
@@ -1669,6 +1693,7 @@ bool CTableFrameSink::SendOperateNotify()
 //取得扑克
 BYTE CTableFrameSink::GetSendCard(bool bTail)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//发送扑克
 	m_cbSendCardCount++;
 	m_cbLeftCardCount--;
@@ -1717,6 +1742,7 @@ BYTE CTableFrameSink::GetSendCard(bool bTail)
 //派发扑克
 bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//状态效验
 	ASSERT(wSendCardUser != INVALID_CHAIR);
 	if (wSendCardUser == INVALID_CHAIR) return false;
@@ -1845,6 +1871,7 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 //响应判断
 bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, enEstimatKind EstimatKind)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//变量定义
 	bool bAroseAction = false;
 
@@ -1939,6 +1966,7 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 //算分
 void CTableFrameSink::CalHuPaiScore(LONGLONG lEndScore[GAME_PLAYER])
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//初始化
 	ZeroMemory(lEndScore,sizeof(LONGLONG)*GAME_PLAYER);
 	ZeroMemory(m_cbUserMaCount,sizeof(m_cbUserMaCount));
@@ -2027,6 +2055,7 @@ void CTableFrameSink::CalHuPaiScore(LONGLONG lEndScore[GAME_PLAYER])
 
 void CTableFrameSink::CalGangScore()
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	SCORE lcell = m_pITableFrame->GetCellScore();
 	if(m_cbGangStatus == WIK_FANG_GANG)//放杠一家扣分
 	{
@@ -2077,6 +2106,7 @@ void CTableFrameSink::CalGangScore()
 //权位过滤
 void CTableFrameSink::FiltrateRight(WORD wWinner, CChiHuRight &chr)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//自摸
 	if(wWinner == m_wProvideUser)
 	{
@@ -2097,6 +2127,7 @@ void CTableFrameSink::FiltrateRight(WORD wWinner, CChiHuRight &chr)
 //设置基数
 void CTableFrameSink::SetGameBaseScore(LONG lBaseScore)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//发送数据
 	m_pITableFrame->SendTableData(INVALID_CHAIR,SUB_S_SET_BASESCORE,&lBaseScore,sizeof(lBaseScore));
 	m_pITableFrame->SendLookonData(INVALID_CHAIR,SUB_S_SET_BASESCORE,&lBaseScore,sizeof(lBaseScore));
@@ -2104,6 +2135,7 @@ void CTableFrameSink::SetGameBaseScore(LONG lBaseScore)
 
 BYTE CTableFrameSink::GetTimes(WORD wChairId)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	BYTE cbScore = 0;
 	ASSERT(m_cbMaCount > 0 && m_cbMaCount <= 6);
 	m_cbUserMaCount[wChairId]=m_cbMaCount;
@@ -2146,6 +2178,7 @@ BYTE CTableFrameSink::GetTimes(WORD wChairId)
 
 BYTE CTableFrameSink::GetRemainingCount(WORD wChairID,BYTE cbCardData)
 {
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	BYTE cbIndex = m_GameLogic.SwitchToCardIndex(cbCardData);
 	BYTE nCount=0;
 	for(int i=m_cbMinusLastCount;i<MAX_REPERTORY-m_cbMinusHeadCount;i++)
@@ -2165,6 +2198,7 @@ BYTE CTableFrameSink::GetRemainingCount(WORD wChairID,BYTE cbCardData)
 
 bool CTableFrameSink::OnActionUserOffLine(WORD wChairID, IServerUserItem * pIServerUserItem)
 {
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	if( (m_pGameServiceOption->wServerType&GAME_GENRE_PERSONAL) != 0)//房卡模式
 		return true;
 	//自动托管

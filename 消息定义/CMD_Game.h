@@ -16,8 +16,8 @@
 //服务定义
 
 //游戏属性
-#define KIND_ID						389									//游戏 I D
-#define GAME_NAME					TEXT("红中麻将")					//游戏名字
+#define KIND_ID						393								//游戏 I D
+#define GAME_NAME					TEXT("朝阳麻将")					//游戏名字
 
 //组件属性
 #define GAME_PLAYER					4									//游戏人数
@@ -30,7 +30,7 @@
 #define MAX_WEAVE					4									//最大组合
 #define MAX_INDEX					34									//最大索引
 #define MAX_COUNT					14									//最大数目
-#define MAX_REPERTORY				112							//最大库存
+#define MAX_REPERTORY				136							//最大库存
 #define MAX_HUA_INDEX				0									//花牌索引
 #define MAX_HUA_COUNT				8									//花牌个数
 
