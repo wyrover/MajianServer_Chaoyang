@@ -11,12 +11,23 @@
 struct tagCustomRule
 {
 	//其他定义
-	BYTE							cbMaCount;							//码数，1：一码全中，2-6：对应码数
-	BYTE							cbPlayerCount;						//人数 2-4
+	BYTE							cbMaCount;							//码数，1：一码全中，2-6：对应码数 // no need in Chaoyang
+	BYTE							cbPlayerCount;						//人数 2-4						   //Always 4 in Chaoyang
+
 	//时间定义
 	BYTE							cbTimeOutCard;						//出牌时间
 	BYTE							cbTimeOperateCard;					//操作时间
-	BYTE							cbTimeStartGame;					//开始时间
+	BYTE							cbTimeStartGame;					//开始时间	
+	
+	// Added custome game settings for Chaoyang
+	BYTE							cbInningsCount_cy;
+	bool							bEnabled_DianPao;
+	bool							bEnabled_FengGang;
+	bool							bEnabled_HuiPai;
+	bool							bEnabled_BaoPai;
+	bool							bEnabled_ZhanLiHu;
+	bool							bEnabled_JiaHu;
+	bool							bEnabled_ChangMaoGang;
 };
 
 //////////////////////////////////////////////////////////////////////////////////

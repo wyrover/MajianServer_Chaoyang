@@ -11,7 +11,7 @@ DWORD		CChiHuRight::m_dwRightMask[MAX_RIGHT_COUNT];
 //构造函数
 CChiHuRight::CChiHuRight()
 {
-	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	ZeroMemory(m_dwRight,sizeof(m_dwRight));
 
 	if(!m_bInit)
@@ -30,7 +30,7 @@ CChiHuRight::CChiHuRight()
 //赋值符重载
 CChiHuRight & CChiHuRight::operator = (DWORD dwRight)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	DWORD dwOtherRight = 0;
 	//验证权位
 	if(!IsValidRight(dwRight))
@@ -55,7 +55,7 @@ CChiHuRight & CChiHuRight::operator = (DWORD dwRight)
 //与等于
 CChiHuRight & CChiHuRight::operator &= (DWORD dwRight)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	bool bNavigate = false;
 	//验证权位
 	if(!IsValidRight(dwRight))
@@ -86,7 +86,7 @@ CChiHuRight & CChiHuRight::operator &= (DWORD dwRight)
 //或等于
 CChiHuRight & CChiHuRight::operator |= (DWORD dwRight)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	//验证权位
 	if(!IsValidRight(dwRight)) return *this;
 
@@ -105,7 +105,7 @@ CChiHuRight & CChiHuRight::operator |= (DWORD dwRight)
 //与
 CChiHuRight CChiHuRight::operator & (DWORD dwRight)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	CChiHuRight chr = *this;
 	return (chr &= dwRight);
 }
@@ -113,7 +113,7 @@ CChiHuRight CChiHuRight::operator & (DWORD dwRight)
 //与
 CChiHuRight CChiHuRight::operator & (DWORD dwRight) const
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	CChiHuRight chr = *this;
 	return (chr &= dwRight);
 }
@@ -121,7 +121,7 @@ CChiHuRight CChiHuRight::operator & (DWORD dwRight) const
 //或
 CChiHuRight CChiHuRight::operator | (DWORD dwRight)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	CChiHuRight chr = *this;
 	return chr |= dwRight;
 }
@@ -129,7 +129,7 @@ CChiHuRight CChiHuRight::operator | (DWORD dwRight)
 //或
 CChiHuRight CChiHuRight::operator | (DWORD dwRight) const
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	CChiHuRight chr = *this;
 	return chr |= dwRight;
 }
@@ -137,7 +137,7 @@ CChiHuRight CChiHuRight::operator | (DWORD dwRight) const
 //相等
 bool CChiHuRight::operator == (DWORD dwRight) const
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	CChiHuRight chr;
 	chr = dwRight;
 	return (*this)==chr;
@@ -146,7 +146,7 @@ bool CChiHuRight::operator == (DWORD dwRight) const
 //相等
 bool CChiHuRight::operator == (const CChiHuRight chr) const
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	for(WORD i = 0; i < CountArray(m_dwRight); i++)
 	{
 		if(m_dwRight[i] != chr.m_dwRight[i]) return false;
@@ -157,7 +157,7 @@ bool CChiHuRight::operator == (const CChiHuRight chr) const
 //不相等
 bool CChiHuRight::operator != (DWORD dwRight) const
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	CChiHuRight chr;
 	chr = dwRight;
 	return (*this)!=chr;
@@ -166,14 +166,14 @@ bool CChiHuRight::operator != (DWORD dwRight) const
 //不相等
 bool CChiHuRight::operator != (const CChiHuRight chr) const
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	return !((*this)==chr);
 }
 
 //是否权位为空
 bool CChiHuRight::IsEmpty()
 {
-	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	for(BYTE i = 0; i < CountArray(m_dwRight); i++)
 		if(m_dwRight[i]) return false;
 	return true;
@@ -182,7 +182,7 @@ bool CChiHuRight::IsEmpty()
 //设置权位为空
 void CChiHuRight::SetEmpty()
 {
-	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	ZeroMemory(m_dwRight,sizeof(m_dwRight));
 	return;
 }
@@ -190,7 +190,7 @@ void CChiHuRight::SetEmpty()
 //获取权位数值
 BYTE CChiHuRight::GetRightData(DWORD dwRight[], BYTE cbMaxCount)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	ASSERT(cbMaxCount >= CountArray(m_dwRight));
 	if(cbMaxCount < CountArray(m_dwRight)) return 0;
 
@@ -201,7 +201,7 @@ BYTE CChiHuRight::GetRightData(DWORD dwRight[], BYTE cbMaxCount)
 //设置权位数值
 bool CChiHuRight::SetRightData(const DWORD dwRight[], BYTE cbRightCount)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	ASSERT(cbRightCount <= CountArray(m_dwRight));
 	if(cbRightCount > CountArray(m_dwRight)) return false;
 
@@ -214,7 +214,6 @@ bool CChiHuRight::SetRightData(const DWORD dwRight[], BYTE cbRightCount)
 //检查仅位是否正确
 bool CChiHuRight::IsValidRight(DWORD dwRight)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	DWORD dwRightHead = dwRight & 0xF0000000;
 	for(BYTE i = 0; i < CountArray(m_dwRightMask); i++)
 		if(m_dwRightMask[i] == dwRightHead) return true;
@@ -254,14 +253,14 @@ const BYTE CGameLogic::m_cbCardDataArray[MAX_REPERTORY]=
 //构造函数
 CGameLogic::CGameLogic()
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	m_cbMagicIndex = MAX_INDEX;
 }
 
 //析构函数
 CGameLogic::~CGameLogic()
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 }
 
 //混乱扑克
@@ -363,6 +362,52 @@ bool CGameLogic::RemoveCard(BYTE cbCardIndex[MAX_INDEX], BYTE cbRemoveCard)
 	return false;
 }
 
+//删除扑克
+bool CGameLogic::RemoveCard(BYTE cbCardData[], BYTE cbCardCount, const BYTE cbRemoveCard[], BYTE cbRemoveCount)
+{
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	//检验数据
+	ASSERT(cbCardCount<=MAX_COUNT);
+	ASSERT(cbRemoveCount<=cbCardCount);
+
+	//定义变量
+	BYTE cbDeleteCount=0,cbTempCardData[MAX_COUNT];
+	if (cbCardCount>CountArray(cbTempCardData))
+		return false;
+	CopyMemory(cbTempCardData,cbCardData,cbCardCount*sizeof(cbCardData[0]));
+
+	//置零扑克
+	for (BYTE i=0;i<cbRemoveCount;i++)
+	{
+		for (BYTE j=0;j<cbCardCount;j++)
+		{
+			if (cbRemoveCard[i]==cbTempCardData[j])
+			{
+				cbDeleteCount++;
+				cbTempCardData[j]=0;
+				break;
+			}
+		}
+	}
+
+	//成功判断
+	if (cbDeleteCount!=cbRemoveCount) 
+	{
+		ASSERT(FALSE);
+		return false;
+	}
+
+	//清理扑克
+	BYTE cbCardPos=0;
+	for (BYTE i=0;i<cbCardCount;i++)
+	{
+		if (cbTempCardData[i]!=0) 
+			cbCardData[cbCardPos++]=cbTempCardData[i];
+	}
+
+	return true;
+}
+
 //财神判断
 bool CGameLogic::IsMagicCard(BYTE cbCardData)
 {
@@ -434,52 +479,6 @@ bool CGameLogic::SortCardList(BYTE cbCardData[MAX_COUNT], BYTE cbCardCount)
 		}
 		cbLast--;
 	} while(bSorted==false);
-
-	return true;
-}
-
-//删除扑克
-bool CGameLogic::RemoveCard(BYTE cbCardData[], BYTE cbCardCount, const BYTE cbRemoveCard[], BYTE cbRemoveCount)
-{
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
-	//检验数据
-	ASSERT(cbCardCount<=MAX_COUNT);
-	ASSERT(cbRemoveCount<=cbCardCount);
-
-	//定义变量
-	BYTE cbDeleteCount=0,cbTempCardData[MAX_COUNT];
-	if (cbCardCount>CountArray(cbTempCardData))
-		return false;
-	CopyMemory(cbTempCardData,cbCardData,cbCardCount*sizeof(cbCardData[0]));
-
-	//置零扑克
-	for (BYTE i=0;i<cbRemoveCount;i++)
-	{
-		for (BYTE j=0;j<cbCardCount;j++)
-		{
-			if (cbRemoveCard[i]==cbTempCardData[j])
-			{
-				cbDeleteCount++;
-				cbTempCardData[j]=0;
-				break;
-			}
-		}
-	}
-
-	//成功判断
-	if (cbDeleteCount!=cbRemoveCount) 
-	{
-		ASSERT(FALSE);
-		return false;
-	}
-
-	//清理扑克
-	BYTE cbCardPos=0;
-	for (BYTE i=0;i<cbCardCount;i++)
-	{
-		if (cbTempCardData[i]!=0) 
-			cbCardData[cbCardPos++]=cbTempCardData[i];
-	}
 
 	return true;
 }
@@ -1025,6 +1024,14 @@ BYTE CGameLogic::GetHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem
 
 	return 0;
 }
+
+BYTE CGameLogic::GetRandHuiPaiCard( )
+{
+	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	BYTE indexHuiPai = rand()%CountArray(m_cbCardDataArray); 
+	return SwitchToCardIndex(m_cbCardDataArray[indexHuiPai]);
+}
+
 //扑克转换
 BYTE CGameLogic::SwitchToCardData(BYTE cbCardIndex)
 {
@@ -1084,7 +1091,7 @@ BYTE CGameLogic::SwitchToCardData(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCard
 //扑克转换
 BYTE CGameLogic::SwitchToCardIndex(const BYTE cbCardData[], BYTE cbCardCount, BYTE cbCardIndex[MAX_INDEX])
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//设置变量
 	ZeroMemory(cbCardIndex,sizeof(BYTE)*MAX_INDEX);
 
@@ -1184,7 +1191,6 @@ BYTE CGameLogic::GetWeaveCard(BYTE cbWeaveKind, BYTE cbCenterCard, BYTE cbCardBu
 
 bool CGameLogic::AddKindItem(tagKindItem &TempKindItem, tagKindItem KindItem[], BYTE &cbKindItemCount, bool &bMagicThree)
 {
-	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	TempKindItem.cbMagicCount =  
 		(m_cbMagicIndex == TempKindItem.cbValidIndex[0] ? 1 : 0) + 
 		(m_cbMagicIndex == TempKindItem.cbValidIndex[1] ? 1 : 0) +
@@ -1287,7 +1293,6 @@ bool CGameLogic::AddKindItem(tagKindItem &TempKindItem, tagKindItem KindItem[], 
 //分析扑克
 bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, CAnalyseItemArray & AnalyseItemArray)
 {
-	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//计算数目
 	BYTE cbCardCount=GetCardCount(cbCardIndex);
 
@@ -1635,7 +1640,6 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 //碰碰和
 bool CGameLogic::IsPengPeng(const tagAnalyseItem *pAnalyseItem)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	for(BYTE i = 0; i < CountArray(pAnalyseItem->cbWeaveKind); i++)
 	{
 		if(pAnalyseItem->cbWeaveKind[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT))
@@ -1647,7 +1651,6 @@ bool CGameLogic::IsPengPeng(const tagAnalyseItem *pAnalyseItem)
 //是否麻七系列
 bool CGameLogic::IsMaQi(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChiHuRight &ChiHuRight)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	if(cbWeaveCount!=0)
 		return false;
 
@@ -1695,7 +1698,6 @@ bool CGameLogic::IsMaQi(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChi
 //十三烂系列
 bool CGameLogic::IsShiSanLan(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChiHuRight &ChiHuRight)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//组合判断
 	if (cbWeaveCount!=0) return false;
 
@@ -1735,7 +1737,6 @@ bool CGameLogic::IsShiSanLan(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount
 //鸡胡
 bool CGameLogic::IsJiHu(const tagAnalyseItem *pAnalyseItem)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	bool bPeng = false,bLian = false;
 	for(BYTE i = 0; i < CountArray(pAnalyseItem->cbWeaveKind); i++)
 	{
@@ -1750,7 +1751,7 @@ bool CGameLogic::IsJiHu(const tagAnalyseItem *pAnalyseItem)
 //平胡
 bool CGameLogic::IsPingHu(const tagAnalyseItem *pAnalyseItem)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	//检查组合
 	for(BYTE i = 0; i < CountArray(pAnalyseItem->cbWeaveKind); i++)
 	{
@@ -1763,7 +1764,7 @@ bool CGameLogic::IsPingHu(const tagAnalyseItem *pAnalyseItem)
 //清一色
 bool CGameLogic::IsQingYiSe(const tagAnalyseItem * pAnalyseItem, bool &bQuanFan)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	//参数校验
 	if(pAnalyseItem==NULL) return false;
 
@@ -1792,7 +1793,7 @@ bool CGameLogic::IsQingYiSe(const tagAnalyseItem * pAnalyseItem, bool &bQuanFan)
 //混一色
 bool CGameLogic::IsHunYiSe(const tagAnalyseItem * pAnalyseItem)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+
 	//参数校验
 	if(pAnalyseItem==NULL) return false;
 

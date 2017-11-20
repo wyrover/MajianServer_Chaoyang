@@ -257,6 +257,15 @@ bool CGameServiceManager::DefaultCustomRule(LPBYTE pcbCustomRule, WORD wCustonSi
 	//ÓÎÏ·¿ØÖÆ
 	pCustomRule->cbMaCount=2;
 	pCustomRule->cbPlayerCount=4;
+
+	pCustomRule->cbInningsCount_cy	= DEFAULT_INNINGS_COUNT;
+	pCustomRule->bEnabled_DianPao	= true;
+	pCustomRule->bEnabled_FengGang= true;
+	pCustomRule->bEnabled_HuiPai	= true;
+	pCustomRule->bEnabled_BaoPai	= true;
+	pCustomRule->bEnabled_ZhanLiHu= true;
+	pCustomRule->bEnabled_JiaHu	= true;
+	pCustomRule->bEnabled_ChangMaoGang = true;
 	return true;
 }
 

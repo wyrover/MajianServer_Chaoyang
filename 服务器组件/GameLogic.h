@@ -33,7 +33,7 @@
 #define WIK_GANG					0x10								//杠牌类型
 #define WIK_LISTEN					0x20								//听牌类型
 #define WIK_CHI_HU					0x40								//吃胡类型
-#define WIK_FANG_PAO			0x80								//放炮
+#define WIK_FANG_PAO				0x80								//放炮
 
 //////////////////////////////////////////////////////////////////////////
 //胡牌定义
@@ -199,10 +199,10 @@ public:
 	bool RemoveCard(BYTE cbCardIndex[MAX_INDEX], const BYTE cbRemoveCard[], BYTE cbRemoveCount);
 	//删除扑克
 	bool RemoveCard(BYTE cbCardIndex[MAX_INDEX], BYTE cbRemoveCard);
-	//排序,根据牌值排序
-	bool SortCardList(BYTE cbCardData[MAX_COUNT], BYTE cbCardCount);
 	//删除扑克
 	bool RemoveCard(BYTE cbCardData[], BYTE cbCardCount, const BYTE cbRemoveCard[], BYTE cbRemoveCount);
+	//排序,根据牌值排序
+	bool SortCardList(BYTE cbCardData[MAX_COUNT], BYTE cbCardCount);
 	//设置财神
 	void SetMagicIndex(BYTE cbMagicIndex) { m_cbMagicIndex = cbMagicIndex; }
 	//财神判断
@@ -250,6 +250,7 @@ public:
 	BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE& cbOutCardCount,BYTE cbOutCardData[],BYTE cbHuCardCount[],BYTE cbHuCardData[][28]);
 	//获取胡牌数据，听牌后调用
 	BYTE GetHuCard( const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbHuCardData[]);
+	BYTE GetRandHuiPaiCard( );
 
 	//转换函数
 public:

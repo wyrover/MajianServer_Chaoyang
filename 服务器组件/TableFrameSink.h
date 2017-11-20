@@ -12,6 +12,9 @@
 using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 
+#define DEFAULT_INNINGS_COUNT       16
+#define INNINGS_COUNT_2             24
+
 //效验类型
 enum enEstimatKind
 {
@@ -35,9 +38,21 @@ class CTableFrameSink : public ITableFrameSink, public ITableUserAction
 {
 	//模式变量
 protected:
-	BYTE							m_cbMaCount;						//码数 1:一码全中;2-6:对应的码数
-	BYTE							m_cbPlayerCount;					//指定游戏人数，2-4
+	BYTE							m_cbMaCount;						//码数 1:一码全中;2-6:对应的码数	// no need in Chaoyang
+	BYTE							m_cbPlayerCount;					//指定游戏人数，2-4					//Always 4 in Chaoyang
+	
+	// Added custome game settings for Chaoyang
+	BYTE							m_cbInningsCount_cy;
+	bool							m_bEnabled_DianPao;
+	bool							m_bEnabled_FengGang;
+	bool							m_bEnabled_HuiPai;
+	bool							m_bEnabled_BaoPai;
+	bool							m_bEnabled_ZhanLiHu;
+	bool							m_bEnabled_JiaHu;
+	bool							m_bEnabled_ChangMaoGang;
+
 	CMD_S_RECORD		m_stRecord;
+
 	//游戏变量
 protected:
 	WORD						m_wSiceCount;									//骰子点数

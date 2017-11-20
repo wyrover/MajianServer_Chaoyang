@@ -107,6 +107,15 @@ struct CMD_S_StatusPlay
 	BYTE							cbPlayerCount;				//玩家人数
 	BYTE							cbMaCount;					//码数
 
+	BYTE							cbInningsCount_cy;
+	BYTE							cbEnabled_DianPao;
+	BYTE							cbEnabled_FengGang;
+	BYTE							cbEnabled_HuiPai;
+	BYTE							cbEnabled_BaoPai;
+	BYTE							cbEnabled_ZhanLiHu;
+	BYTE							cbEnabled_JiaHu;
+	BYTE							cbEnabled_ChangMaoGang;
+
 	//状态变量
 	BYTE							cbActionCard;								//动作扑克
 	BYTE							cbActionMask;								//动作掩码
@@ -167,6 +176,16 @@ struct CMD_S_GameStart
 	WORD							wHeapHead;							//牌堆头部
 	WORD							wHeapTail;							//牌堆尾部
 	BYTE                            cbMagicIndex;                       //财神索引
+
+	BYTE							cbInningsCount_cy;
+	BYTE							cbEnabled_DianPao;
+	BYTE							cbEnabled_FengGang;
+	BYTE							cbEnabled_HuiPai;
+	BYTE							cbEnabled_BaoPai;
+	BYTE							cbEnabled_ZhanLiHu;
+	BYTE							cbEnabled_JiaHu;
+	BYTE							cbEnabled_ChangMaoGang;
+
 	BYTE							cbHeapCardInfo[GAME_PLAYER][2];		//堆立信息
 	BYTE							cbUserAction;						//用户动作
 	BYTE							cbCardData[MAX_COUNT];				//麻将列表

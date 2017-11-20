@@ -97,6 +97,14 @@ CTableFrameSink::CTableFrameSink()
 	//规则变量
 	m_cbMaCount=0;
 	m_cbPlayerCount=0;
+	m_cbInningsCount_cy	= DEFAULT_INNINGS_COUNT;
+	m_bEnabled_DianPao	= true;
+	m_bEnabled_FengGang	= true;
+	m_bEnabled_HuiPai	= true;
+	m_bEnabled_BaoPai	= true;
+	m_bEnabled_ZhanLiHu	= true;
+	m_bEnabled_JiaHu	= true;
+	m_bEnabled_ChangMaoGang = true;
 
 #ifdef  CARD_DISPATCHER_CONTROL
 	m_cbControlGameCount = 0;
@@ -228,6 +236,14 @@ bool CTableFrameSink::Initialization(IUnknownEx * pIUnknownEx)
 
 	m_cbMaCount = m_pGameCustomRule->cbMaCount;
 	m_cbPlayerCount = m_pGameCustomRule->cbPlayerCount;
+	m_cbInningsCount_cy	    = m_pGameCustomRule->cbInningsCount_cy;
+	m_bEnabled_DianPao		= m_pGameCustomRule->bEnabled_DianPao;
+	m_bEnabled_FengGang		= m_pGameCustomRule->bEnabled_FengGang;
+	m_bEnabled_HuiPai		= m_pGameCustomRule->bEnabled_HuiPai;
+	m_bEnabled_BaoPai		= m_pGameCustomRule->bEnabled_BaoPai;
+	m_bEnabled_ZhanLiHu		= m_pGameCustomRule->bEnabled_ZhanLiHu;
+	m_bEnabled_JiaHu		= m_pGameCustomRule->bEnabled_JiaHu;
+	m_bEnabled_ChangMaoGang = m_pGameCustomRule->bEnabled_ChangMaoGang;
 
 	ZeroMemory(&m_stRecord,sizeof(m_stRecord));
 
@@ -281,7 +297,7 @@ bool CTableFrameSink::OnEventGameStart()
 	TCHAR szPath[MAX_PATH] = TEXT("");
 	GetCurrentDirectory(sizeof(szPath), szPath);
 	CString strSaveFileName;
-	strSaveFileName.Format(TEXT("%s\\SparrowHZData.dat"), szPath);
+	strSaveFileName.Format(TEXT("%s\\SparrowCHYData.dat"), szPath);
 	//非控制状态
 	if(m_cbControlGameCount==0)
 	{
@@ -302,8 +318,8 @@ bool CTableFrameSink::OnEventGameStart()
 
 #endif
 
-	//红中可以当财神
- 	m_cbMagicIndex = m_GameLogic.SwitchToCardIndex(0x35);
+	//会牌可以当财神
+	m_cbMagicIndex = m_GameLogic.GetRandHuiPaiCard(); //m_GameLogic.SwitchToCardIndex(0x35);
  	m_GameLogic.SetMagicIndex(m_cbMagicIndex);
 
 	//分发扑克
@@ -420,6 +436,14 @@ bool CTableFrameSink::OnEventGameStart()
 	GameStart.wHeapHead = m_wHeapHead;
 	GameStart.wHeapTail = m_wHeapTail;
 	GameStart.cbMagicIndex = m_cbMagicIndex;
+	GameStart.cbInningsCount_cy = m_cbInningsCount_cy;
+	GameStart.cbEnabled_DianPao = m_bEnabled_DianPao;
+	GameStart.cbEnabled_FengGang= m_bEnabled_FengGang;
+	GameStart.cbEnabled_HuiPai	= m_bEnabled_HuiPai;
+	GameStart.cbEnabled_BaoPai	= m_bEnabled_BaoPai;
+	GameStart.cbEnabled_ZhanLiHu= m_bEnabled_ZhanLiHu;
+	GameStart.cbEnabled_JiaHu	= m_bEnabled_JiaHu;
+	GameStart.cbEnabled_ChangMaoGang = m_bEnabled_ChangMaoGang;
 	CopyMemory(GameStart.cbHeapCardInfo, m_cbHeapCardInfo, sizeof(GameStart.cbHeapCardInfo));
 
 	//发送数据
@@ -455,6 +479,8 @@ bool CTableFrameSink::OnEventGameStart()
 bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pIServerUserItem, BYTE cbReason)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	CStringA str;str.Format("\n\t\t wChairID:%d, cbReason:%d   ", wChairID, cbReason);
+	OutputDebugStringA(str);
 	if((m_pGameServiceOption->wServerType & GAME_GENRE_MATCH) != 0)
 		m_pITableFrame->KillGameTimer(IDI_CHECK_TABLE);
 	switch (cbReason)
@@ -621,6 +647,8 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 bool CTableFrameSink::OnEventSendGameScene(WORD wChairID, IServerUserItem * pIServerUserItem, BYTE cbGameStatus, bool bSendSecret)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	CStringA str;str.Format("\n\t\t wChairID:%d, cbGameStatus:%d   ", wChairID, cbGameStatus);
+	OutputDebugStringA(str);
 	switch (cbGameStatus)
 	{
 	case GAME_SCENE_FREE:	//空闲状态
@@ -672,6 +700,15 @@ bool CTableFrameSink::OnEventSendGameScene(WORD wChairID, IServerUserItem * pISe
 			//规则
 			StatusPlay.cbMaCount = m_cbMaCount;
 			StatusPlay.cbPlayerCount = m_cbPlayerCount;
+			StatusPlay.cbInningsCount_cy	= m_cbInningsCount_cy;
+			StatusPlay.cbEnabled_DianPao	= m_bEnabled_DianPao;
+			StatusPlay.cbEnabled_FengGang	= m_bEnabled_FengGang;
+			StatusPlay.cbEnabled_HuiPai		= m_bEnabled_HuiPai;
+			StatusPlay.cbEnabled_BaoPai		= m_bEnabled_BaoPai;
+			StatusPlay.cbEnabled_ZhanLiHu	= m_bEnabled_ZhanLiHu;
+			StatusPlay.cbEnabled_JiaHu		= m_bEnabled_JiaHu;
+			StatusPlay.cbEnabled_ChangMaoGang= m_bEnabled_ChangMaoGang;
+
 			//游戏变量
 			StatusPlay.wBankerUser = m_wBankerUser;
 			StatusPlay.wCurrentUser = m_wCurrentUser;
@@ -817,8 +854,7 @@ bool CTableFrameSink::OnUserScroeNotify(WORD wChairID, IServerUserItem * pIServe
 bool CTableFrameSink::OnGameMessage(WORD wSubCmdID, VOID * pData, WORD wDataSize, IServerUserItem * pIServerUserItem)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
-	CStringA str;
-	str.Format("\nwSubCmdID:%d, wDataSize:%d", wSubCmdID, wDataSize);
+	CStringA str;str.Format("\n\t\twSubCmdID:%d, wDataSize:%d   ", wSubCmdID, wDataSize);
 	OutputDebugStringA(str);
 	m_cbWaitTime = 0;
 	switch (wSubCmdID)
@@ -920,7 +956,15 @@ bool CTableFrameSink::OnActionUserSitDown(WORD wChairID, IServerUserItem * pISer
 	{
 		m_cbPlayerCount = pSetInfo[1];
 		m_cbMaCount = pSetInfo[2];
-		//test = pSetInfo[3];
+
+		m_cbInningsCount_cy	= pSetInfo[3];
+		m_bEnabled_DianPao	= pSetInfo[4]!=0;
+		m_bEnabled_FengGang = pSetInfo[5]!=0;
+		m_bEnabled_HuiPai	= pSetInfo[6]!=0;
+		m_bEnabled_BaoPai	= pSetInfo[7]!=0;
+		m_bEnabled_ZhanLiHu = pSetInfo[8]!=0;
+		m_bEnabled_JiaHu	= pSetInfo[9]!=0;
+		m_bEnabled_ChangMaoGang = pSetInfo[10]!=0;
 	}
 
 

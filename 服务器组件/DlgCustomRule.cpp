@@ -9,6 +9,9 @@ END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////////////
 
+#define DEFAULT_INNINGS_COUNT       16
+#define INNINGS_COUNT_2             24
+
 //构造函数
 CDlgCustomRule::CDlgCustomRule() : CDialog(IDD_CUSTOM_RULE)
 {
@@ -69,6 +72,16 @@ bool CDlgCustomRule::FillDataToControl()
 	//游戏控制
 	SetDlgItemInt(IDC_MA_COUNT,m_CustomRule.cbMaCount);
 	SetDlgItemInt(IDC_PLAYER_COUNT,m_CustomRule.cbPlayerCount);
+
+	((CButton*)GetDlgItem( IDC_RADIO_16 ))->SetCheck(m_CustomRule.cbInningsCount_cy==DEFAULT_INNINGS_COUNT);
+	((CButton*)GetDlgItem( IDC_RADIO_24 ))->SetCheck(m_CustomRule.cbInningsCount_cy!=DEFAULT_INNINGS_COUNT);
+	((CButton*)GetDlgItem( IDC_CHK_DIANPAO ))->SetCheck(m_CustomRule.bEnabled_DianPao!=0);
+	((CButton*)GetDlgItem( IDC_CHK_FENGGANG ))->SetCheck(m_CustomRule.bEnabled_FengGang!=0);
+	((CButton*)GetDlgItem( IDC_CHK_HUIPAI ))->SetCheck(m_CustomRule.bEnabled_HuiPai!=0);
+	((CButton*)GetDlgItem( IDC_CHK_BAOPAI ))->SetCheck(m_CustomRule.bEnabled_BaoPai!=0);
+	((CButton*)GetDlgItem( IDC_CHK_ZHUANGLIHU ))->SetCheck(m_CustomRule.bEnabled_ZhanLiHu!=0);
+	((CButton*)GetDlgItem( IDC_CHK_JIAHU ))->SetCheck(m_CustomRule.bEnabled_JiaHu!=0);
+	((CButton*)GetDlgItem( IDC_CHK_CHANGMAO ))->SetCheck(m_CustomRule.bEnabled_ChangMaoGang!=0);
 	return true;
 }
 
@@ -81,8 +94,8 @@ bool CDlgCustomRule::FillControlToData()
 	m_CustomRule.cbTimeOperateCard=(BYTE)GetDlgItemInt(IDC_TIME_OPERATE_CARD);
 
 	//游戏控制
-	m_CustomRule.cbMaCount=(WORD)GetDlgItemInt(IDC_MA_COUNT);
-	m_CustomRule.cbPlayerCount=(WORD)GetDlgItemInt(IDC_PLAYER_COUNT);
+	m_CustomRule.cbMaCount=(BYTE)GetDlgItemInt(IDC_MA_COUNT);
+	m_CustomRule.cbPlayerCount=(BYTE)GetDlgItemInt(IDC_PLAYER_COUNT);
 	//开始时间
 	if ((m_CustomRule.cbTimeStartGame<5)||(m_CustomRule.cbTimeStartGame>60))
 	{
@@ -117,6 +130,15 @@ bool CDlgCustomRule::FillControlToData()
 		AfxMessageBox(TEXT("游戏人数范围错误，请重新设置！"),MB_ICONSTOP);
 		return false;
 	}
+
+	m_CustomRule.cbInningsCount_cy	= ((CButton*)GetDlgItem( IDC_RADIO_16 ))->GetCheck() ? DEFAULT_INNINGS_COUNT : INNINGS_COUNT_2;
+	m_CustomRule.bEnabled_DianPao	= ((CButton*)GetDlgItem( IDC_CHK_DIANPAO ))->GetCheck()==BST_CHECKED;
+	m_CustomRule.bEnabled_FengGang= ((CButton*)GetDlgItem( IDC_CHK_FENGGANG ))->GetCheck()==BST_CHECKED;
+	m_CustomRule.bEnabled_HuiPai	= ((CButton*)GetDlgItem( IDC_CHK_HUIPAI ))->GetCheck()==BST_CHECKED;
+	m_CustomRule.bEnabled_BaoPai	= ((CButton*)GetDlgItem( IDC_CHK_BAOPAI ))->GetCheck()==BST_CHECKED;
+	m_CustomRule.bEnabled_ZhanLiHu= ((CButton*)GetDlgItem( IDC_CHK_ZHUANGLIHU ))->GetCheck()==BST_CHECKED;
+	m_CustomRule.bEnabled_JiaHu	= ((CButton*)GetDlgItem( IDC_CHK_JIAHU ))->GetCheck()==BST_CHECKED;
+	m_CustomRule.bEnabled_ChangMaoGang = ((CButton*)GetDlgItem( IDC_CHK_CHANGMAO ))->GetCheck()==BST_CHECKED;
 	return true;
 }
 

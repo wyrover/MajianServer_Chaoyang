@@ -102,7 +102,7 @@ END
 // Dialog
 //
 
-IDD_CUSTOM_RULE DIALOGEX 0, 0, 345, 230
+IDD_CUSTOM_RULE DIALOGEX 0, 0, 345, 278
 STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
 FONT 9, "宋体", 400, 0, 0x0
 BEGIN
@@ -111,26 +111,46 @@ BEGIN
     EDITTEXT        IDC_TIME_OPERATE_CARD,66,40,43,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     EDITTEXT        IDC_TIME_OUT_CARD,66,57,43,12,ES_AUTOHSCROLL | ES_NUMBER
-    EDITTEXT        IDC_MA_COUNT,66,104,43,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "16 把(房卡 x 1)",IDC_RADIO_16,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,44,123,76,10
+    CONTROL         "24 局(房卡 x 2)",IDC_RADIO_24,"Button",
+                    BS_AUTORADIOBUTTON,175,123,76,10
+    CONTROL         "点炮包三家",IDC_CHK_DIANPAO,"Button",BS_AUTOCHECKBOX | 
+                    WS_GROUP | WS_TABSTOP,37,152,56,10
+    CONTROL         "旋风杠",IDC_CHK_FENGGANG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,163,153,40,10
+    CONTROL         "会牌",IDC_CHK_HUIPAI,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,37,173,32,10
+    CONTROL         "宝牌",IDC_CHK_BAOPAI,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,163,175,32,10
+    CONTROL         "站立胡",IDC_CHK_ZHUANGLIHU,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,37,195,40,10
+    CONTROL         "夹胡",IDC_CHK_JIAHU,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,120,198,32,10
+    CONTROL         "长毛杠",IDC_CHK_CHANGMAO,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,216,200,40,10
+    EDITTEXT        IDC_MA_COUNT,68,219,43,12,ES_AUTOHSCROLL | ES_NUMBER | 
+                    NOT WS_VISIBLE
+    EDITTEXT        IDC_PLAYER_COUNT,68,237,43,12,ES_AUTOHSCROLL | ES_NUMBER | 
+                    NOT WS_VISIBLE
+    GROUPBOX        "",IDC_STATIC,6,7,333,68
     LTEXT           "开始时间：",IDC_STATIC,23,25,41,8
     LTEXT           "操作时间：",IDC_STATIC,23,42,41,8
     LTEXT           "出牌时间：",IDC_STATIC,23,59,41,8
-    LTEXT           "码数：",IDC_STATIC,23,107,25,8
+    LTEXT           "码数：",IDC_STATIC,26,223,25,8,NOT WS_VISIBLE
     LTEXT           "（默认 30 秒，有效范围 5 - 60 秒）",IDC_STATIC,121,26,
                     137,8
     LTEXT           "（默认 10 秒，有效范围 5 - 60 秒）",IDC_STATIC,121,43,
                     137,8
     LTEXT           "（默认 20 秒，有效范围 5 - 60 秒）",IDC_STATIC,122,60,
                     137,8
-    LTEXT           "（1：一码全中，2-6：对应码数）",IDC_STATIC,121,106,121,
-                    8
-    GROUPBOX        "时间控制",IDC_STATIC,6,7,333,68
-    GROUPBOX        "游戏控制",IDC_STATIC,6,88,333,119
-    LTEXT           "游戏人数：",IDC_STATIC,22,122,41,8,NOT WS_VISIBLE
-    EDITTEXT        IDC_PLAYER_COUNT,66,121,43,12,ES_AUTOHSCROLL | ES_NUMBER | 
-                    NOT WS_VISIBLE
-    LTEXT           "（游戏人数：2-4人）",IDC_STATIC,121,123,77,8,NOT 
+    LTEXT           "（1：一码全中，2-6：对应码数）",IDC_STATIC,124,221,121,
+                    8,NOT WS_VISIBLE
+    GROUPBOX        "游戏控制",IDC_STATIC,6,88,333,178
+    LTEXT           "游戏人数：",IDC_STATIC,24,237,41,8,NOT WS_VISIBLE
+    LTEXT           "（游戏人数：2-4人）",IDC_STATIC,127,238,77,8,NOT 
                     WS_VISIBLE
+    GROUPBOX        "把数选项",IDC_STATIC,21,108,306,38,WS_GROUP
 END
 
 
@@ -142,6 +162,22 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 SERVER_ICON             ICON                    "res\\GameClient.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_CUSTOM_RULE, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 274
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
 #endif    // Chinese (P.R.C.) resources
 /////////////////////////////////////////////////////////////////////////////
 
