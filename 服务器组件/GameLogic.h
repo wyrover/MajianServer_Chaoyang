@@ -25,15 +25,21 @@
 #define WIK_AN_GANG					0x03								//暗杠
 
 //动作标志
-#define WIK_NULL					0x00								//没有类型
-#define WIK_LEFT					0x01								//左吃类型
-#define WIK_CENTER					0x02								//中吃类型
-#define WIK_RIGHT					0x04								//右吃类型
-#define WIK_PENG					0x08								//碰牌类型
-#define WIK_GANG					0x10								//杠牌类型
-#define WIK_LISTEN					0x20								//听牌类型
-#define WIK_CHI_HU					0x40								//吃胡类型
-#define WIK_FANG_PAO				0x80								//放炮
+#define WIK_NULL					0x0000								//没有类型
+#define WIK_LEFT					0x0001								//左吃类型
+#define WIK_CENTER					0x0002								//中吃类型
+#define WIK_RIGHT					0x0004								//右吃类型
+#define WIK_PENG					0x0008								//碰牌类型
+#define WIK_GANG					0x0010								//杠牌类型
+#define WIK_LISTEN					0x0020								//听牌类型
+#define WIK_CHI_HU					0x0040								//吃胡类型
+#define WIK_FANG_PAO				0x0080								//放炮
+
+//朝阳麻将 Additional Flag
+#define WIK_ARROW					0x0100							//【中发白】三张【箭牌】在一起组成的杠
+#define WIK_WIND					0x0200							//【东南西北】四张【风牌】在一起组成的杠
+#define WIK_CHASEARROW				0x0400							//【中发白】的杠追加【中发白】牌后的杠
+#define WIK_CHASEWIND				0x0800							//【东南西北】的杠追加风牌后的杠
 
 //////////////////////////////////////////////////////////////////////////
 //胡牌定义
@@ -63,7 +69,7 @@
 //类型子项
 struct tagKindItem
 {
-	BYTE							cbWeaveKind;						//组合类型
+	WORD							wWeaveKind;						//组合类型
 	BYTE							cbCenterCard;						//中心扑克
 	BYTE							cbValidIndex[3];					//实际扑克索引
 	BYTE							cbMagicCount;						//财神牌数
@@ -82,7 +88,7 @@ struct tagAnalyseItem
 {
 	BYTE							cbCardEye;							//牌眼扑克
 	bool                            bMagicEye;                          //牌眼是否是王霸
-	BYTE							cbWeaveKind[MAX_WEAVE];				//组合类型
+	WORD							wWeaveKind[MAX_WEAVE];				//组合类型
 	BYTE							cbCenterCard[MAX_WEAVE];			//中心扑克
 	BYTE                            cbCardData[MAX_WEAVE][4];           //实际扑克
 };
@@ -218,7 +224,7 @@ public:
 	//等级函数
 public:
 	//动作等级
-	BYTE GetUserActionRank(BYTE cbUserAction);
+	BYTE GetUserActionRank(WORD wUserAction);
 	//胡牌等级
 	WORD GetChiHuActionRank(const CChiHuRight & ChiHuRight);
 	//胡牌倍数
@@ -271,7 +277,7 @@ public:
 	//扑克数目
 	BYTE GetCardCount(const BYTE cbCardIndex[MAX_INDEX]);	
 	//组合扑克
-	BYTE GetWeaveCard(BYTE cbWeaveKind, BYTE cbCenterCard, BYTE cbCardBuffer[4]);
+	BYTE GetWeaveCard(WORD wWeaveKind, BYTE cbCenterCard, BYTE cbCardBuffer[4]);
 
 	//内部函数
 private:

@@ -75,13 +75,13 @@ bool CDlgCustomRule::FillDataToControl()
 
 	((CButton*)GetDlgItem( IDC_RADIO_16 ))->SetCheck(m_CustomRule.cbInningsCount_cy==DEFAULT_INNINGS_COUNT);
 	((CButton*)GetDlgItem( IDC_RADIO_24 ))->SetCheck(m_CustomRule.cbInningsCount_cy!=DEFAULT_INNINGS_COUNT);
-	((CButton*)GetDlgItem( IDC_CHK_DIANPAO ))->SetCheck(m_CustomRule.bEnabled_DianPao!=0);
-	((CButton*)GetDlgItem( IDC_CHK_FENGGANG ))->SetCheck(m_CustomRule.bEnabled_FengGang!=0);
-	((CButton*)GetDlgItem( IDC_CHK_HUIPAI ))->SetCheck(m_CustomRule.bEnabled_HuiPai!=0);
-	((CButton*)GetDlgItem( IDC_CHK_BAOPAI ))->SetCheck(m_CustomRule.bEnabled_BaoPai!=0);
-	((CButton*)GetDlgItem( IDC_CHK_ZHUANGLIHU ))->SetCheck(m_CustomRule.bEnabled_ZhanLiHu!=0);
-	((CButton*)GetDlgItem( IDC_CHK_JIAHU ))->SetCheck(m_CustomRule.bEnabled_JiaHu!=0);
-	((CButton*)GetDlgItem( IDC_CHK_CHANGMAO ))->SetCheck(m_CustomRule.bEnabled_ChangMaoGang!=0);
+	((CButton*)GetDlgItem( IDC_CHK_DIANPAO ))->SetCheck(m_CustomRule.bEnabled_DianPao);
+	((CButton*)GetDlgItem( IDC_CHK_FENGGANG ))->SetCheck(m_CustomRule.bEnabled_FengGang);
+	((CButton*)GetDlgItem( IDC_CHK_HUIPAI ))->SetCheck(m_CustomRule.bEnabled_HuiPai);
+	((CButton*)GetDlgItem( IDC_CHK_BAOPAI ))->SetCheck(m_CustomRule.bEnabled_BaoPai);
+	((CButton*)GetDlgItem( IDC_CHK_ZHUANGLIHU ))->SetCheck(m_CustomRule.bEnabled_ZhanLiHu);
+	((CButton*)GetDlgItem( IDC_CHK_JIAHU ))->SetCheck(m_CustomRule.bEnabled_JiaHu);
+	((CButton*)GetDlgItem( IDC_CHK_CHANGMAO ))->SetCheck(m_CustomRule.bEnabled_ChangMaoGang);
 	return true;
 }
 

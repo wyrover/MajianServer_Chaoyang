@@ -484,20 +484,20 @@ bool CGameLogic::SortCardList(BYTE cbCardData[MAX_COUNT], BYTE cbCardCount)
 }
 
 //动作等级
-BYTE CGameLogic::GetUserActionRank(BYTE cbUserAction)
+BYTE CGameLogic::GetUserActionRank(WORD wUserAction)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//胡牌等级
-	if (cbUserAction&WIK_CHI_HU) { return 4; }
+	if (wUserAction&WIK_CHI_HU) { return 4; }
 
 	//杠牌等级
-	if (cbUserAction&WIK_GANG) { return 3; }
+	if (wUserAction&WIK_GANG) { return 3; }
 
 	//碰牌等级
-	if (cbUserAction&WIK_PENG) { return 2; }
+	if (wUserAction&WIK_PENG) { return 2; }
 
 	//上牌等级
-	if (cbUserAction&(WIK_RIGHT|WIK_CENTER|WIK_LEFT)) { return 1; }
+	if (wUserAction&(WIK_RIGHT|WIK_CENTER|WIK_LEFT)) { return 1; }
 
 	return 0;
 }
@@ -751,7 +751,7 @@ BYTE CGameLogic::AnalyseGangCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 	//组合杠牌
 	for (BYTE i=0;i<cbWeaveCount;i++)
 	{
-		if (WeaveItem[i].cbWeaveKind==WIK_PENG)
+		if (WeaveItem[i].wWeaveKind==WIK_PENG)
 		{
 			if (cbCardIndex[SwitchToCardIndex(WeaveItem[i].cbCenterCard)]==1)
 			{
@@ -785,7 +785,7 @@ BYTE CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagW
 	//组合杠牌
 	for (BYTE i=0;i<cbWeaveCount;i++)
 	{
-		if (WeaveItem[i].cbWeaveKind==WIK_PENG)
+		if (WeaveItem[i].wWeaveKind==WIK_PENG)
 		{
 			if (WeaveItem[i].cbCenterCard==cbProvideCard)//之后抓来的的牌才能和碰组成杠
 			{
@@ -1128,11 +1128,11 @@ BYTE CGameLogic::GetCardCount(const BYTE cbCardIndex[MAX_INDEX])
 }
 
 //获取组合
-BYTE CGameLogic::GetWeaveCard(BYTE cbWeaveKind, BYTE cbCenterCard, BYTE cbCardBuffer[4])
+BYTE CGameLogic::GetWeaveCard(WORD wWeaveKind, BYTE cbCenterCard, BYTE cbCardBuffer[4])
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//组合扑克
-	switch (cbWeaveKind)
+	switch (wWeaveKind)
 	{
 	case WIK_LEFT:		//上牌操作
 		{
@@ -1331,7 +1331,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 				//设置结果
 				for (BYTE j=0;j<cbWeaveCount;j++)
 				{
-					AnalyseItem.cbWeaveKind[j]=WeaveItem[j].cbWeaveKind;
+					AnalyseItem.wWeaveKind[j]=WeaveItem[j].wWeaveKind;
 					AnalyseItem.cbCenterCard[j]=WeaveItem[j].cbCenterCard;
 					CopyMemory(AnalyseItem.cbCardData[j],WeaveItem[j].cbCardData,sizeof(WeaveItem[j].cbCardData));
 				}
@@ -1391,7 +1391,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 						cbIndex = INDEX_REPLACE_CARD;
 						cbCenterCard = SwitchToCardData(INDEX_REPLACE_CARD);
 					}
-					TempKindItem.cbWeaveKind=WIK_PENG;
+					TempKindItem.wWeaveKind=WIK_PENG;
 					TempKindItem.cbCenterCard=cbCenterCard;
 					TempKindItem.cbValidIndex[0] = nTempIndex>0?cbIndex:m_cbMagicIndex;
 					TempKindItem.cbValidIndex[1] = nTempIndex>1?cbIndex:m_cbMagicIndex;
@@ -1404,7 +1404,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 					{
 						--nTempIndex;
 						//1个财神与之组合
-						TempKindItem.cbWeaveKind=WIK_PENG;
+						TempKindItem.wWeaveKind=WIK_PENG;
 						TempKindItem.cbCenterCard=cbCenterCard;
 						TempKindItem.cbValidIndex[0] = nTempIndex>0?cbIndex:m_cbMagicIndex;
 						TempKindItem.cbValidIndex[1] = nTempIndex>1?cbIndex:m_cbMagicIndex;
@@ -1414,7 +1414,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 						//两个财神与之组合
 						if(cbMagicCardCount>1)
 						{
-							TempKindItem.cbWeaveKind=WIK_PENG;
+							TempKindItem.wWeaveKind=WIK_PENG;
 							TempKindItem.cbCenterCard=cbCenterCard;
 							TempKindItem.cbValidIndex[0] = nTempIndex>0?cbIndex:m_cbMagicIndex;
 							TempKindItem.cbValidIndex[1] = nTempIndex>1?cbIndex:m_cbMagicIndex;
@@ -1468,7 +1468,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 						if(nMagicCountTemp >= 0)
 						{
 							ASSERT(cbKindItemCount < CountArray(KindItem));
-							TempKindItem.cbWeaveKind=WIK_LEFT;
+							TempKindItem.wWeaveKind=WIK_LEFT;
 							TempKindItem.cbCenterCard=SwitchToCardData(i);
 							CopyMemory(TempKindItem.cbValidIndex,cbValidIndex,sizeof(cbValidIndex));
 							AddKindItem(TempKindItem, KindItem, cbKindItemCount, bMagicThree);
@@ -1583,15 +1583,15 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 						//设置组合
 						for (BYTE i=0;i<cbWeaveCount;i++)
 						{
-							AnalyseItem.cbWeaveKind[i]=WeaveItem[i].cbWeaveKind;
+							AnalyseItem.wWeaveKind[i]=WeaveItem[i].wWeaveKind;
 							AnalyseItem.cbCenterCard[i]=WeaveItem[i].cbCenterCard;
-							GetWeaveCard(WeaveItem[i].cbWeaveKind,WeaveItem[i].cbCenterCard,AnalyseItem.cbCardData[i]);
+							GetWeaveCard(WeaveItem[i].wWeaveKind,WeaveItem[i].cbCenterCard,AnalyseItem.cbCardData[i]);
 						}
 
 						//设置牌型
 						for (BYTE i=0;i<cbLessKindItem;i++) 
 						{
-							AnalyseItem.cbWeaveKind[i+cbWeaveCount]=pKindItem[i]->cbWeaveKind;
+							AnalyseItem.wWeaveKind[i+cbWeaveCount]=pKindItem[i]->wWeaveKind;
 							AnalyseItem.cbCenterCard[i+cbWeaveCount]=pKindItem[i]->cbCenterCard;
 							AnalyseItem.cbCardData[cbWeaveCount+i][0] = SwitchToCardData(pKindItem[i]->cbValidIndex[0]);
 							AnalyseItem.cbCardData[cbWeaveCount+i][1] = SwitchToCardData(pKindItem[i]->cbValidIndex[1]);
@@ -1640,9 +1640,9 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 //碰碰和
 bool CGameLogic::IsPengPeng(const tagAnalyseItem *pAnalyseItem)
 {
-	for(BYTE i = 0; i < CountArray(pAnalyseItem->cbWeaveKind); i++)
+	for(BYTE i = 0; i < CountArray(pAnalyseItem->wWeaveKind); i++)
 	{
-		if(pAnalyseItem->cbWeaveKind[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT))
+		if(pAnalyseItem->wWeaveKind[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT))
 			return false;
 	}
 	return true;
@@ -1738,9 +1738,9 @@ bool CGameLogic::IsShiSanLan(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount
 bool CGameLogic::IsJiHu(const tagAnalyseItem *pAnalyseItem)
 {
 	bool bPeng = false,bLian = false;
-	for(BYTE i = 0; i < CountArray(pAnalyseItem->cbWeaveKind); i++)
+	for(BYTE i = 0; i < CountArray(pAnalyseItem->wWeaveKind); i++)
 	{
-		if(pAnalyseItem->cbWeaveKind[i]&(WIK_PENG|WIK_GANG))
+		if(pAnalyseItem->wWeaveKind[i]&(WIK_PENG|WIK_GANG))
 			bPeng = true;
 		else bLian = true;
 	}
@@ -1753,9 +1753,9 @@ bool CGameLogic::IsPingHu(const tagAnalyseItem *pAnalyseItem)
 {
 
 	//检查组合
-	for(BYTE i = 0; i < CountArray(pAnalyseItem->cbWeaveKind); i++)
+	for(BYTE i = 0; i < CountArray(pAnalyseItem->wWeaveKind); i++)
 	{
-		if(pAnalyseItem->cbWeaveKind[i]&(WIK_PENG|WIK_GANG)) return false;
+		if(pAnalyseItem->wWeaveKind[i]&(WIK_PENG|WIK_GANG)) return false;
 	}
 
 	return true;

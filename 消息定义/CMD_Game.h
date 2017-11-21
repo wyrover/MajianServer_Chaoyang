@@ -52,7 +52,7 @@ struct CMD_S_RECORD
 {
 	int		 nCount;
 	BYTE cbHuCount[GAME_PLAYER];//胡牌次数
-	BYTE cbMaCount[GAME_PLAYER];//中码个数
+	BYTE cbMaCount[GAME_PLAYER];//中码个数			//no need
 	BYTE cbAnGang[GAME_PLAYER];//暗杠次数
 	BYTE cbMingGang[GAME_PLAYER];//明杠次数
 	SCORE lAllScore[GAME_PLAYER];	//总结算分
@@ -76,13 +76,13 @@ struct CMD_S_StatusFree
 
 	//规则					
 	BYTE							cbPlayerCount;				//玩家人数
-	BYTE							cbMaCount;					//码数
+	BYTE							cbMaCount;					//码数		//no need
 };
 
 //组合子项
 struct tagWeaveItem
 {
-	BYTE							cbWeaveKind;								//组合类型
+	WORD							wWeaveKind;								//组合类型
 	BYTE							cbCenterCard;								//中心扑克
 	BYTE							cbParam;									//类型标志
 	WORD						wProvideUser;								//供应用户
@@ -105,16 +105,16 @@ struct CMD_S_StatusPlay
 
 	//规则					
 	BYTE							cbPlayerCount;				//玩家人数
-	BYTE							cbMaCount;					//码数
+	BYTE							cbMaCount;					//码数		//no need
 
 	BYTE							cbInningsCount_cy;
-	BYTE							cbEnabled_DianPao;
-	BYTE							cbEnabled_FengGang;
-	BYTE							cbEnabled_HuiPai;
-	BYTE							cbEnabled_BaoPai;
-	BYTE							cbEnabled_ZhanLiHu;
-	BYTE							cbEnabled_JiaHu;
-	BYTE							cbEnabled_ChangMaoGang;
+	bool							bEnabled_DianPao;
+	bool							bEnabled_FengGang;
+	bool							bEnabled_HuiPai;
+	bool							bEnabled_BaoPai;
+	bool							bEnabled_ZhanLiHu;
+	bool							bEnabled_JiaHu;
+	bool							bEnabled_ChangMaoGang;
 
 	//状态变量
 	BYTE							cbActionCard;								//动作扑克
@@ -178,16 +178,16 @@ struct CMD_S_GameStart
 	BYTE                            cbMagicIndex;                       //财神索引
 
 	BYTE							cbInningsCount_cy;
-	BYTE							cbEnabled_DianPao;
-	BYTE							cbEnabled_FengGang;
-	BYTE							cbEnabled_HuiPai;
-	BYTE							cbEnabled_BaoPai;
-	BYTE							cbEnabled_ZhanLiHu;
-	BYTE							cbEnabled_JiaHu;
-	BYTE							cbEnabled_ChangMaoGang;
+	bool							bEnabled_DianPao;
+	bool							bEnabled_FengGang;
+	bool							bEnabled_HuiPai;
+	bool							bEnabled_BaoPai;
+	bool							bEnabled_ZhanLiHu;
+	bool							bEnabled_JiaHu;
+	bool							bEnabled_ChangMaoGang;
 
 	BYTE							cbHeapCardInfo[GAME_PLAYER][2];		//堆立信息
-	BYTE							cbUserAction;						//用户动作
+	WORD							wUserAction;						//用户动作
 	BYTE							cbCardData[MAX_COUNT];				//麻将列表
 	BYTE							cbOutCardCount;
 	BYTE							cbOutCardData[MAX_COUNT][28];
@@ -212,7 +212,7 @@ struct CMD_S_OutCard
 struct CMD_S_SendCard
 {
 	BYTE							cbCardData;							//扑克数据
-	BYTE							cbActionMask;						//动作掩码
+	WORD							wActionMask;						//动作掩码
 	WORD							wCurrentUser;						//当前用户
 	WORD							wSendCardUser;						//发牌用户
 	WORD							wReplaceUser;						//补牌用户
@@ -222,7 +222,7 @@ struct CMD_S_SendCard
 //操作提示
 struct CMD_S_OperateNotify
 {
-	BYTE							cbActionMask;						//动作掩码
+	WORD							wActionMask;						//动作掩码
 	BYTE							cbActionCard;						//动作扑克
 };
 
@@ -230,9 +230,9 @@ struct CMD_S_OperateNotify
 struct CMD_S_OperateResult
 {
 	WORD							wOperateUser;						//操作用户
-	BYTE							cbActionMask;						//动作掩码
+	WORD							wActionMask;						//动作掩码
 	WORD							wProvideUser;						//供应用户
-	BYTE							cbOperateCode;						//操作代码
+	WORD							wOperateCode;						//操作代码
 	BYTE							cbOperateCard[3];					//操作扑克
 };
 struct CMD_S_Hu_Data
@@ -276,7 +276,7 @@ struct CMD_S_GameConclude
 	BYTE							cbCardCount[GAME_PLAYER];			//扑克数目
 	BYTE							cbHandCardData[GAME_PLAYER][MAX_COUNT];//扑克列表
 
-	BYTE							cbMaCount[GAME_PLAYER];							//码数
+	BYTE							cbMaCount[GAME_PLAYER];							//码数			//no need
 	BYTE							cbMaData[7];							//码数据
 };
 
@@ -312,7 +312,7 @@ struct CMD_C_OutCard
 //操作命令
 struct CMD_C_OperateCard
 {
-	BYTE							cbOperateCode;						//操作代码
+	WORD							wOperateCode;						//操作代码
 	BYTE							cbOperateCard[3];					//操作扑克
 };
 

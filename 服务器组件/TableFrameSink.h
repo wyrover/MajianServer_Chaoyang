@@ -15,6 +15,8 @@ using namespace std;
 #define DEFAULT_INNINGS_COUNT       16
 #define INNINGS_COUNT_2             24
 
+#define INVAILD_CARD_INDEX          0xFF
+
 //效验类型
 enum enEstimatKind
 {
@@ -102,9 +104,9 @@ protected:
 	//用户状态
 public:
 	bool							m_bResponse[GAME_PLAYER];						//响应标志
-	BYTE							m_cbUserAction[GAME_PLAYER];					//用户动作
+	WORD							m_wUserAction[GAME_PLAYER];					//用户动作
 	BYTE							m_cbOperateCard[GAME_PLAYER][3];				//操作扑克
-	BYTE							m_cbPerformAction[GAME_PLAYER];					//执行动作
+	WORD							m_wPerformAction[GAME_PLAYER];					//执行动作
 	SCORE						m_lUserGangScore[GAME_PLAYER];					//游戏中杠的输赢
 	//结束信息
 protected:
@@ -205,7 +207,7 @@ public:
 	//事件接口
 public:
 	//时间事件
-	virtual bool OnTimerMessage(DWORD wTimerID, WPARAM wBindParam);
+	virtual bool OnTimerMessage(DWORD dwTimerID, WPARAM wBindParam);
 	//数据事件
 	virtual bool OnDataBaseMessage(WORD wRequestID, VOID * pData, WORD wDataSize);
 	//积分事件
@@ -241,7 +243,7 @@ protected:
 	//用户出牌
 	bool OnUserOutCard(WORD wChairID, BYTE cbCardData,bool bSysOut=false);
 	//用户操作
-	bool OnUserOperateCard(WORD wChairID, BYTE cbOperateCode, BYTE cbOperateCard[3]);
+	bool OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE cbOperateCard[3]);
 	//用户听牌
 	bool OnUserListenCard(WORD wChairID, bool bListenCard);
 	//用户托管
