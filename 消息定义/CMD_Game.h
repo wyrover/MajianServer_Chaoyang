@@ -33,6 +33,7 @@
 #define MAX_REPERTORY				136							//最大库存
 #define MAX_HUA_INDEX				0									//花牌索引
 #define MAX_HUA_COUNT				8									//花牌个数
+#define MAX_CHASE_COUNT				21									//最大长毛个数
 
 //扑克定义
 #define HEAP_FULL_COUNT				28									//堆立全牌
@@ -134,6 +135,8 @@ struct CMD_S_StatusPlay
 	BYTE							cbCardData[MAX_COUNT];						//扑克列表
 	BYTE							cbSendCardData;								//发送扑克
 
+	BYTE							cbChaseArrowArray[GAME_PLAYER][MAX_CHASE_COUNT];	//长毛杠数目
+
 	//组合扑克
 	BYTE							cbWeaveItemCount[GAME_PLAYER];				//组合数目
 	tagWeaveItem			WeaveItemArray[GAME_PLAYER][MAX_WEAVE];		//组合扑克
@@ -234,6 +237,9 @@ struct CMD_S_OperateResult
 	WORD							wProvideUser;						//供应用户
 	WORD							wOperateCode;						//操作代码
 	BYTE							cbOperateCard[3];					//操作扑克
+
+	//BYTE							cbResultWeaveCount;							//做完这次操作后 该用户的 组合牌组数
+	BYTE							cbChaseArrowArray[MAX_CHASE_COUNT];			//做完这次操作后 该用户的 长毛杠数目
 };
 struct CMD_S_Hu_Data
 {
@@ -278,6 +284,8 @@ struct CMD_S_GameConclude
 
 	BYTE							cbMaCount[GAME_PLAYER];							//码数			//no need
 	BYTE							cbMaData[7];							//码数据
+
+	BYTE							cbChaseArrowArray[GAME_PLAYER][MAX_CHASE_COUNT];	//长毛杠数目
 };
 
 //用户托管

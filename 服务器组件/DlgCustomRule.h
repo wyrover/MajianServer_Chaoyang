@@ -5,6 +5,10 @@
 
 #include "Stdafx.h"
 
+
+#define DEFAULT_INNINGS_COUNT       16
+#define INNINGS_COUNT_2             24
+
 //////////////////////////////////////////////////////////////////////////////////
 
 //配置结构
@@ -54,6 +58,9 @@ protected:
 	virtual VOID OnOK();
 	//取消消息
 	virtual VOID OnCancel();
+
+private:
+	VOID CDlgCustomRule::OnClickChechBox(UINT nIDbutton);
 
 	//功能函数
 public:

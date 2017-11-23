@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Stdafx.h"
+#include "DlgCustomRule.h"
 //////////////////////////////////////////////////////////////////////////
 
 //用于财神的转换，如果有牌可以代替财神本身牌使用，则设为该牌索引，否则设为MAX_INDEX. 注:如果替换牌是序数牌,将出错.
@@ -24,6 +25,11 @@
 #define WIK_FANG_GANG				0x02								//放杠
 #define WIK_AN_GANG					0x03								//暗杠
 
+#define WIK_WND_GANG				0x04								//【东南西北】四张【风牌】在一起组成的杠
+#define WIK_ARW_GANG				0x05								//【中发白】三张【箭牌】在一起组成的杠
+#define WIK_CHASE_WND_GANG			0x06								//【东南西北】的杠追加风牌后的杠 长毛杠
+#define WIK_CHASE_ARW_GANG			0x07								//【中发白】的杠追加【中发白】牌后的杠 长毛杠
+
 //动作标志
 #define WIK_NULL					0x0000								//没有类型
 #define WIK_LEFT					0x0001								//左吃类型
@@ -32,7 +38,7 @@
 #define WIK_PENG					0x0008								//碰牌类型
 #define WIK_GANG					0x0010								//杠牌类型
 #define WIK_LISTEN					0x0020								//听牌类型
-#define WIK_CHI_HU					0x0040								//吃胡类型
+#define WIK_CHI_HU					0x0040								//吃胡类型	//no need in chaoyang
 #define WIK_FANG_PAO				0x0080								//放炮
 
 //朝阳麻将 Additional Flag
@@ -40,6 +46,7 @@
 #define WIK_WIND					0x0200							//【东南西北】四张【风牌】在一起组成的杠
 #define WIK_CHASEARROW				0x0400							//【中发白】的杠追加【中发白】牌后的杠
 #define WIK_CHASEWIND				0x0800							//【东南西北】的杠追加风牌后的杠
+#define WIK_UPDATE_BAO				0x8000							// UPDATED BAO PAI
 
 //////////////////////////////////////////////////////////////////////////
 //胡牌定义
@@ -180,6 +187,7 @@ class CGameLogic
 protected:
 	static const BYTE				m_cbCardDataArray[MAX_REPERTORY];	//扑克数据
 	BYTE							m_cbMagicIndex;						//钻牌索引
+	tagCustomRule					m_CustomRule;						//定制规则
 
 	//函数定义
 public:
@@ -244,9 +252,9 @@ public:
 	//动作判断
 public:
 	//杠牌分析
-	BYTE AnalyseGangCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, tagGangCardResult & GangCardResult);
+	WORD AnalyseGangCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, tagGangCardResult & GangCardResult);
 	//杠牌分析
-	BYTE AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbProvideCard, tagGangCardResult & GangCardResult);
+	WORD AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbProvideCard, tagGangCardResult & GangCardResult, BYTE cbDiscardCount);
 	//吃胡分析
 	BYTE AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbCurrentCard, CChiHuRight &ChiHuRight,bool b4HZHu=false);
 	//听牌分析
@@ -304,6 +312,23 @@ protected:
 	bool IsQingYiSe(const tagAnalyseItem * pAnalyseItem, bool &bQuanFan);	
 	//混一色
 	bool IsHunYiSe(const tagAnalyseItem * pAnalyseItem);	
+
+
+public:
+	//验证某玩家是否可以做特殊杠操作
+	bool IsSpGangOK(const BYTE cbCardIndex[MAX_INDEX], DWORD dwOpCode);
+	//从手中扣掉特殊杠的牌组
+	bool TakeOutSpGang(BYTE cbCardIndex[MAX_INDEX], DWORD dwOpCode);
+	//从手中扣掉长毛杠的牌组
+	bool TakeOutCHMGang(BYTE cbCardIndex[MAX_INDEX],BYTE cbCernterCard);
+
+public:
+	//按默认值初始化定制规则
+	void InitCustomRule();
+	//设置定制规则
+	void SetCustomRule(tagCustomRule *pRule);
+
+	bool IsChaseArrow(const BYTE cbCardIndex[MAX_INDEX],const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode);
 };
 
 //////////////////////////////////////////////////////////////////////////////////

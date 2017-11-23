@@ -5,6 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CDlgCustomRule, CDialog)
+	ON_CONTROL_RANGE(BN_CLICKED,IDC_CHK_FENGGANG, IDC_CHK_CHANGMAO, OnClickChechBox)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -12,6 +13,10 @@ END_MESSAGE_MAP()
 #define DEFAULT_INNINGS_COUNT       16
 #define INNINGS_COUNT_2             24
 
+
+
+//ON_COMMAND(IDC_CHK_FENGGANG, OnClickFengGang)
+//ON_COMMAND(IDC_CHK_CHANGMAO, OnClickChangMaoGang)
 //构造函数
 CDlgCustomRule::CDlgCustomRule() : CDialog(IDD_CUSTOM_RULE)
 {
@@ -59,6 +64,26 @@ VOID CDlgCustomRule::OnCancel()
 	GetParent()->PostMessage(WM_COMMAND,MAKELONG(IDCANCEL,0),0);
 
 	return;
+}
+
+VOID CDlgCustomRule::OnClickChechBox(UINT nIDbutton)
+{
+	switch(nIDbutton){
+		case IDC_CHK_CHANGMAO:
+			{
+				if ( ((CButton*)GetDlgItem( IDC_CHK_CHANGMAO ))->GetCheck() == BST_CHECKED){
+					((CButton*)GetDlgItem( IDC_CHK_FENGGANG ))->SetCheck(true);
+				}
+			}
+			break;
+		case IDC_CHK_FENGGANG:
+			{
+				if ( ((CButton*)GetDlgItem( IDC_CHK_FENGGANG ))->GetCheck() != BST_CHECKED){
+					((CButton*)GetDlgItem( IDC_CHK_CHANGMAO ))->SetCheck(false);
+				}
+			}
+			break;
+	}
 }
 
 //更新控件
@@ -131,7 +156,7 @@ bool CDlgCustomRule::FillControlToData()
 		return false;
 	}
 
-	m_CustomRule.cbInningsCount_cy	= ((CButton*)GetDlgItem( IDC_RADIO_16 ))->GetCheck() ? DEFAULT_INNINGS_COUNT : INNINGS_COUNT_2;
+	m_CustomRule.cbInningsCount_cy	= ((CButton*)GetDlgItem( IDC_RADIO_16 ))->GetCheck()==BST_CHECKED ? DEFAULT_INNINGS_COUNT : INNINGS_COUNT_2;
 	m_CustomRule.bEnabled_DianPao	= ((CButton*)GetDlgItem( IDC_CHK_DIANPAO ))->GetCheck()==BST_CHECKED;
 	m_CustomRule.bEnabled_FengGang= ((CButton*)GetDlgItem( IDC_CHK_FENGGANG ))->GetCheck()==BST_CHECKED;
 	m_CustomRule.bEnabled_HuiPai	= ((CButton*)GetDlgItem( IDC_CHK_HUIPAI ))->GetCheck()==BST_CHECKED;

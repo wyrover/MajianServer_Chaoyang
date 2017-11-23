@@ -12,9 +12,6 @@
 using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 
-#define DEFAULT_INNINGS_COUNT       16
-#define INNINGS_COUNT_2             24
-
 #define INVAILD_CARD_INDEX          0xFF
 
 //效验类型
@@ -43,16 +40,6 @@ protected:
 	BYTE							m_cbMaCount;						//码数 1:一码全中;2-6:对应的码数	// no need in Chaoyang
 	BYTE							m_cbPlayerCount;					//指定游戏人数，2-4					//Always 4 in Chaoyang
 	
-	// Added custome game settings for Chaoyang
-	BYTE							m_cbInningsCount_cy;
-	bool							m_bEnabled_DianPao;
-	bool							m_bEnabled_FengGang;
-	bool							m_bEnabled_HuiPai;
-	bool							m_bEnabled_BaoPai;
-	bool							m_bEnabled_ZhanLiHu;
-	bool							m_bEnabled_JiaHu;
-	bool							m_bEnabled_ChangMaoGang;
-
 	CMD_S_RECORD		m_stRecord;
 
 	//游戏变量
@@ -62,6 +49,7 @@ protected:
 	bool							m_bTing[GAME_PLAYER];							//是否听牌
 	bool							m_bTrustee[GAME_PLAYER];						//是否托管
 	BYTE                        m_cbMagicIndex;									 //财神索引
+	BYTE							m_cbBaoPaiIndex;
 	bool							m_bPlayStatus[GAME_PLAYER];				//是否参与游戏
 	//属性变量
 protected:
@@ -137,7 +125,8 @@ protected:
 protected:
 	BYTE							m_cbCardIndex[GAME_PLAYER][MAX_INDEX];			//用户扑克
 	BYTE							m_cbHandCardCount[GAME_PLAYER];					//扑克数目
-	
+
+	BYTE							m_cbChaseArrowArray[GAME_PLAYER][MAX_CHASE_COUNT];		//长毛杠数目
 	//组合扑克
 protected:
 	BYTE							m_cbWeaveItemCount[GAME_PLAYER];				//组合数目
@@ -255,10 +244,16 @@ protected:
 
 	//辅助函数
 protected:
-	//辅助函数
+	//准备操作结果
+	void PrepareOperateResult(CMD_S_OperateResult &OperateResult);
 protected:
 	//发送操作
 	bool SendOperateNotify();
+
+	bool SendUpdateBaopaiNotify();
+
+	bool checkBaopaiExist();
+
 	//取得扑克
 	BYTE GetSendCard(bool bTail = false);
 	//派发扑克

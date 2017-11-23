@@ -253,7 +253,7 @@ const BYTE CGameLogic::m_cbCardDataArray[MAX_REPERTORY]=
 //构造函数
 CGameLogic::CGameLogic()
 {
-
+	InitCustomRule();
 	m_cbMagicIndex = MAX_INDEX;
 }
 
@@ -730,11 +730,11 @@ BYTE CGameLogic::EstimateGangCard(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCurr
 }
 
 //杠牌分析
-BYTE CGameLogic::AnalyseGangCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, tagGangCardResult & GangCardResult)
+WORD CGameLogic::AnalyseGangCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, tagGangCardResult & GangCardResult)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//设置变量
-	BYTE cbActionMask=WIK_NULL;
+	WORD wActionMask=WIK_NULL;
 	ZeroMemory(&GangCardResult,sizeof(GangCardResult));
 
 	//手上杠牌
@@ -743,7 +743,7 @@ BYTE CGameLogic::AnalyseGangCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 		if(i == m_cbMagicIndex) continue;
 		if (cbCardIndex[i]==4)
 		{
-			cbActionMask|=WIK_GANG;
+			wActionMask|=WIK_GANG;
 			GangCardResult.cbCardData[GangCardResult.cbCardCount++]=SwitchToCardData(i);
 		}
 	}
@@ -755,20 +755,20 @@ BYTE CGameLogic::AnalyseGangCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 		{
 			if (cbCardIndex[SwitchToCardIndex(WeaveItem[i].cbCenterCard)]==1)
 			{
-				cbActionMask|=WIK_GANG;
+				wActionMask|=WIK_GANG;
 				GangCardResult.cbCardData[GangCardResult.cbCardCount++]=WeaveItem[i].cbCenterCard;
 			}
 		}
 	}
 
-	return cbActionMask;
+	return wActionMask;
 }
 
-BYTE CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbProvideCard, tagGangCardResult & GangCardResult)
+WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbProvideCard, tagGangCardResult & GangCardResult, BYTE cbDiscardCount)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//设置变量
-	BYTE cbActionMask=WIK_NULL;
+	WORD wActionMask=WIK_NULL;
 	ZeroMemory(&GangCardResult,sizeof(GangCardResult));
 
 	//手上杠牌
@@ -777,7 +777,7 @@ BYTE CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagW
 		if(i == m_cbMagicIndex) continue;
 		if (cbCardIndex[i]==4)
 		{
-			cbActionMask|=WIK_GANG;
+			wActionMask|=WIK_GANG;
 			GangCardResult.cbCardData[GangCardResult.cbCardCount++]=SwitchToCardData(i);
 		}
 	}
@@ -789,13 +789,40 @@ BYTE CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagW
 		{
 			if (WeaveItem[i].cbCenterCard==cbProvideCard)//之后抓来的的牌才能和碰组成杠
 			{
-				cbActionMask|=WIK_GANG;
+				wActionMask|=WIK_GANG;
 				GangCardResult.cbCardData[GangCardResult.cbCardCount++]=WeaveItem[i].cbCenterCard;
 			}
 		}
 	}
 
-	return cbActionMask;
+	bool bXuanFeng = false;
+	bool bChangMao = false;
+	if( m_CustomRule.bEnabled_FengGang && cbDiscardCount<1){
+		bXuanFeng = true;
+	}
+	if( m_CustomRule.bEnabled_ChangMaoGang){
+		bChangMao = true;
+	}
+
+	if (bXuanFeng && IsSpGangOK(cbCardIndex, WIK_WIND))
+	{
+		wActionMask |= WIK_WIND;
+	}
+	if (bXuanFeng && IsSpGangOK(cbCardIndex, WIK_ARROW))
+	{
+		wActionMask |= WIK_ARROW;
+	}
+
+	if ( bChangMao && IsChaseArrow(cbCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEWIND))
+	{
+		wActionMask |= WIK_CHASEWIND;
+	}
+	if ( bChangMao && IsChaseArrow(cbCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEARROW))			//m_CustomRule.cbZhuiFeng && 
+	{
+		wActionMask |= WIK_CHASEARROW;
+	}
+
+	return wActionMask;
 }
 
 //吃胡分析
@@ -1180,6 +1207,26 @@ BYTE CGameLogic::GetWeaveCard(WORD wWeaveKind, BYTE cbCenterCard, BYTE cbCardBuf
 
 			return 4;
 		}
+
+	case WIK_WIND:		//东南西北
+		{
+			//设置变量
+			cbCardBuffer[0]=0x31;
+			cbCardBuffer[1]=0x32;
+			cbCardBuffer[2]=0x33;
+			cbCardBuffer[3]=0x34;
+
+			return 4;
+		}
+	case WIK_ARROW:		//中发白
+		{
+			//设置变量
+			cbCardBuffer[0]=0x35;
+			cbCardBuffer[1]=0x36;
+			cbCardBuffer[2]=0x37;
+
+			return 3;
+		}
 	default:
 		{
 			ASSERT(FALSE);
@@ -1283,8 +1330,27 @@ bool CGameLogic::AddKindItem(tagKindItem &TempKindItem, tagKindItem KindItem[], 
 	}
 	else
 	{
-		CopyMemory(&KindItem[cbKindItemCount++],&TempKindItem,sizeof(TempKindItem));
-		return true;
+		bool findSame = false;
+		for(int j = 0; j < cbKindItemCount; j++)
+		{
+			findSame = true;
+			for(int i = 0; i < 3; i++)
+			{
+				if(KindItem[j].cbValidIndex[i] != TempKindItem.cbValidIndex[i])
+				{
+					findSame = false;
+				}
+			}
+			if( findSame )
+				break;
+		}
+
+		if(!findSame)
+		{
+			CopyMemory(&KindItem[cbKindItemCount++],&TempKindItem,sizeof(TempKindItem));
+			return true;
+		}
+		return false;
 	}
 }
 
@@ -1322,7 +1388,8 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 		//牌眼判断
 		for (BYTE i=0;i<MAX_INDEX;i++)
 		{
-			if (cbCardIndex[i]==2 || (m_cbMagicIndex != MAX_INDEX && i != m_cbMagicIndex && cbCardIndex[m_cbMagicIndex]+cbCardIndex[i]==2))
+			// isValidKezi
+			if (cbCardIndex[i]==2 || (IsValidCard(SwitchToCardData(m_cbMagicIndex)) && i != m_cbMagicIndex && cbCardIndex[m_cbMagicIndex]+cbCardIndex[i]==2))
 			{
 				//变量定义
 				tagAnalyseItem AnalyseItem;
@@ -1358,7 +1425,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 	BYTE cbMagicCardCount = 0;
 	BYTE cbTempMagicCount = 0;
 
-	if(m_cbMagicIndex != MAX_INDEX)
+	if(IsValidCard(SwitchToCardData(m_cbMagicIndex)))
 	{
 		cbMagicCardCount = cbCardIndex[m_cbMagicIndex];
 		//如果财神有代替牌，财神与代替牌转换
@@ -1436,8 +1503,8 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 				}while(nTempIndex+cbMagicCardCount >= 3);
 			}
 
-			//连牌判断
-			if ((i<(MAX_INDEX-MAX_HUA_INDEX-9))&&((i%9)<7))
+			//连牌判断 // 顺字牌
+			if ((i<3*9-2)&&((i%9)<7))
 			{
 				//只要财神牌数加上3个顺序索引的牌数大于等于3,则进行组合
 				if(cbMagicCardCount+cbMagicCardIndex[i]+cbMagicCardIndex[i+1]+cbMagicCardIndex[i+2] >= 3)
@@ -1821,7 +1888,159 @@ bool CGameLogic::IsHunYiSe(const tagAnalyseItem * pAnalyseItem)
 }
 
 
+//验证某玩家是否可以做特殊杠操作
+bool CGameLogic::IsSpGangOK(const BYTE cbCardIndex[MAX_INDEX], DWORD dwOpCode)
+{
+	switch (dwOpCode)
+	{
+	case WIK_WIND:
+		{
+			int nWindCondition;
+			BYTE cbWindArray[] = {0x31, 0x32, 0x33, 0x34};	//【东】【南】【西】【北】
+			nWindCondition = 0;
+			for (int i=0; i<4; i++)
+			{
+				if (cbCardIndex[SwitchToCardIndex(cbWindArray[i])]<1)
+				{
+					nWindCondition--;
+					break;
+				}
+			}
+			return (nWindCondition>=0);
+		}
+	case WIK_ARROW:
+		{
+			int nArrowCondition;
+			BYTE cbArrowArray[] = {0x35, 0x36, 0x37};		//【中】【发】【白】
+			nArrowCondition = 0;
+			for (int i=0; i<3; i++)
+			{
+				if (cbCardIndex[SwitchToCardIndex(cbArrowArray[i])]<1)
+				{
+					nArrowCondition--;
+					break;
+				}
+			}
+			return (nArrowCondition>=0);
+		}
+	}
 
+	return false;
+}
 
+bool CGameLogic::IsChaseArrow(const BYTE cbCardIndex[MAX_INDEX],const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode)
+{
+	switch (dwOpCode)
+	{
+	case WIK_CHASEWIND:											//【东】【南】【西】【北】
+		{
+			for (int i = 0;i<cbWeaveICount;i++)
+			{
+				if (WeaveItem[i].wWeaveKind ==WIK_WIND  && (cbCardIndex[27]>0 || cbCardIndex[28]>0 || cbCardIndex[29]>0 || cbCardIndex[30]>0))
+				{
+					return true;
+				}
+			}
+			break;
+		}
+	case WIK_CHASEARROW:											//【中】【发】【白】
+		{
+			for (int i = 0;i<cbWeaveICount;i++)
+			{
+				if (WeaveItem[i].wWeaveKind == WIK_ARROW && (cbCardIndex[31]>0 || cbCardIndex[32]>0 || cbCardIndex[33]>0))	
+				{
+					return true;
+				}
+			}
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+	return false;
+}
+
+//从手中扣掉特殊杠的牌组
+bool CGameLogic::TakeOutSpGang(BYTE cbCardIndex[MAX_INDEX], DWORD dwOpCode)
+{
+	if (!IsSpGangOK(cbCardIndex, dwOpCode))
+	{
+		return false;
+	}
+
+	switch (dwOpCode)
+	{
+	case WIK_WIND:
+		{
+			BYTE cbWindArray[] = {0x31, 0x32, 0x33, 0x34};	//【东】【南】【西】【北】
+			for (int i=0; i<4; i++)
+			{
+				cbCardIndex[SwitchToCardIndex(cbWindArray[i])]--;
+			}
+			return true;
+		}
+	case WIK_ARROW:
+		{
+			BYTE cbArrowArray[] = {0x35, 0x36, 0x37};		//【中】【发】【白】
+			for (int i=0; i<3; i++)
+			{
+				cbCardIndex[SwitchToCardIndex(cbArrowArray[i])]--;
+			}
+			return true;
+		}
+
+	default:
+		{
+			break;
+		}
+	}
+
+	return false;
+}
+
+// 从手中扣掉长毛杠的牌组
+bool CGameLogic::TakeOutCHMGang(BYTE cbCardIndex[MAX_INDEX],BYTE cbCernterCard)
+{
+	cbCardIndex[SwitchToCardIndex(cbCernterCard)]--;
+	if (cbCardIndex[SwitchToCardIndex(cbCernterCard)]<0)
+	{
+		return false;
+	}
+	return true;
+}
+
+//按默认值初始化定制规则
+void CGameLogic::InitCustomRule()
+{
+	m_CustomRule.cbTimeOutCard=20;
+	m_CustomRule.cbTimeStartGame=30;
+	m_CustomRule.cbTimeOperateCard=10;
+
+	//游戏控制
+	m_CustomRule.cbMaCount=2;
+	m_CustomRule.cbPlayerCount=4;
+
+	m_CustomRule.cbInningsCount_cy	= DEFAULT_INNINGS_COUNT;
+	m_CustomRule.bEnabled_DianPao	= true;
+	m_CustomRule.bEnabled_FengGang= true;
+	m_CustomRule.bEnabled_HuiPai	= true;
+	m_CustomRule.bEnabled_BaoPai	= true;
+	m_CustomRule.bEnabled_ZhanLiHu= true;
+	m_CustomRule.bEnabled_JiaHu	= true;
+	m_CustomRule.bEnabled_ChangMaoGang = true;
+}
+
+//设置定制规则
+void CGameLogic::SetCustomRule(tagCustomRule *pRule)
+{
+	if (pRule == NULL)
+	{
+		return;
+	}
+
+	CopyMemory(&m_CustomRule, pRule, sizeof(tagCustomRule));
+}
 
 //////////////////////////////////////////////////////////////////////////////////
