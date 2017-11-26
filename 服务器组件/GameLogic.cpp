@@ -411,9 +411,18 @@ bool CGameLogic::RemoveCard(BYTE cbCardData[], BYTE cbCardCount, const BYTE cbRe
 //财神判断
 bool CGameLogic::IsMagicCard(BYTE cbCardData)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
-	if(m_cbMagicIndex != MAX_INDEX)
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	if(m_cbMagicIndex < MAX_INDEX)
 		return SwitchToCardIndex(cbCardData) == m_cbMagicIndex;
+	return false;
+}
+
+//财神判断
+bool CGameLogic::IsBaoPaiCard(BYTE cbCardData)
+{
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	if(m_cbBaopaiIndex < MAX_INDEX)
+		return (m_CustomRule.bEnabled_BaoPai && SwitchToCardIndex(cbCardData)==m_cbBaopaiIndex);
 	return false;
 }
 
@@ -764,7 +773,9 @@ WORD CGameLogic::AnalyseGangCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 	return wActionMask;
 }
 
-WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbProvideCard, tagGangCardResult & GangCardResult, BYTE cbDiscardCount)
+WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], 
+								   BYTE cbWeaveCount,BYTE cbProvideCard, 
+								   tagGangCardResult & GangCardResult, BYTE cbDiscardCount)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//设置变量
@@ -813,11 +824,11 @@ WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagW
 		wActionMask |= WIK_ARROW;
 	}
 
-	if ( bChangMao && IsChaseArrow(cbCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEWIND))
+	if ( bChangMao && IsChaseArrow(cbProvideCard,WeaveItem,cbWeaveCount,WIK_CHASEWIND))
 	{
 		wActionMask |= WIK_CHASEWIND;
 	}
-	if ( bChangMao && IsChaseArrow(cbCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEARROW))			//m_CustomRule.cbZhuiFeng && 
+	if ( bChangMao && IsChaseArrow(cbProvideCard,WeaveItem,cbWeaveCount,WIK_CHASEARROW))			//m_CustomRule.cbZhuiFeng && 
 	{
 		wActionMask |= WIK_CHASEARROW;
 	}
@@ -826,7 +837,10 @@ WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagW
 }
 
 //吃胡分析
-BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbCurrentCard, CChiHuRight &ChiHuRight,bool b4HZHu/*=false*/)
+BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], 
+								  const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, 
+								  BYTE cbCurrentCard, CChiHuRight &ChiHuRight,
+								  bool bTingStatus/*=false*/)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//变量定义
@@ -849,10 +863,12 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWe
 	if (cbCurrentCard!=0)
 		cbCardIndexTemp[SwitchToCardIndex(cbCurrentCard)]++;
 
-	if(b4HZHu && cbCardIndexTemp[31]==4)//四个红中直接胡牌
-	{
-		return WIK_CHI_HU;
+	if( IsBaoPaiCard(cbCurrentCard) && bTingStatus ){
+		cbChiHuKind = WIK_CHI_HU;
+
+		ChiHuRight |= CHR_JIN_BAO;
 	}
+		
 	//分析扑克
 	AnalyseCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,AnalyseItemArray);
 
@@ -864,13 +880,11 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWe
 // 		{
 // 			//变量定义
 // 			tagAnalyseItem * pAnalyseItem=&AnalyseItemArray[i];
-// 
 //  			//碰碰胡
-//  			if(IsPengPeng(pAnalyseItem)) 
+//  		if(IsPengPeng(pAnalyseItem)) 
 // 			{
 // 				ChiHuRight |= CHR_PENG_PENG;
 // 			}
-// 
 // 		}
 
 		ChiHuRight |= CHR_PING_HU;
@@ -883,7 +897,7 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWe
 }
 
 //听牌分析
-BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount)
+BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[],BYTE cbWeaveCount)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//复制数据
@@ -893,7 +907,7 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 	BYTE cbCardCount = GetCardCount(cbCardIndexTemp);
 	CChiHuRight chr;
 
-	if((cbCardCount + 1) % 3 == 0)
+	if(cbCardCount% 3 == 2)
 	{
 		for(BYTE i = 0; i < MAX_INDEX - MAX_HUA_INDEX; i++)
 		{
@@ -902,8 +916,8 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 
 			for(BYTE j = 0; j < MAX_INDEX-MAX_HUA_INDEX; j++)
 			{
-				BYTE cbCurrentCard = SwitchToCardData(j);
-				if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp, WeaveItem, cbWeaveCount, cbCurrentCard, chr))
+				BYTE cbTestCard = SwitchToCardData(j);
+				if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp, WeaveItem, cbWeaveCount, cbTestCard, chr))
 					return WIK_LISTEN;
 			}
 
@@ -923,8 +937,9 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 	return WIK_NULL;
 }
 
-//听牌分析
-BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbOutCard[][28])
+BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,
+								 BYTE& cbOutCardCount,BYTE cbOutCardData[],
+								 BYTE cbHuCardCount[],BYTE cbHuCardData[][28])
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//复制数据
@@ -935,48 +950,7 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 	BYTE cbCardCount = GetCardCount(cbCardIndexTemp);
 	CChiHuRight chr;
 
-	if((cbCardCount-2)%3==0)
-	{
-		for(BYTE i = 0; i < MAX_INDEX-MAX_HUA_INDEX; i++)
-		{
-			if(cbCardIndexTemp[i] == 0) continue;
-			cbCardIndexTemp[i]--;
-			
-			bool bAdd=false;
-			BYTE nCount=0;
-			for(BYTE j = 0; j < MAX_INDEX-MAX_HUA_INDEX; j++)
-			{
-				BYTE cbCurrentCard = SwitchToCardData(j);
-				if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbCurrentCard,chr))
-				{
-					if(bAdd==FALSE)
-					{
-						bAdd=true;
-						cbOutCard[0][cbOutCount++] = SwitchToCardData(i);
-					}
-					cbOutCard[cbOutCount][nCount++]=SwitchToCardData(j);
-				}
-			}
-
-			cbCardIndexTemp[i]++;
-		}
-	}
-
-	return cbOutCount;
-}
-
-BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE& cbOutCardCount,BYTE cbOutCardData[],BYTE cbHuCardCount[],BYTE cbHuCardData[][28])
-{
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
-	//复制数据
-	BYTE cbOutCount = 0;
-	BYTE cbCardIndexTemp[MAX_INDEX];
-	CopyMemory(cbCardIndexTemp,cbCardIndex,sizeof(cbCardIndexTemp));
-
-	BYTE cbCardCount = GetCardCount(cbCardIndexTemp);
-	CChiHuRight chr;
-
-	if((cbCardCount-2)%3==0)
+	if(cbCardCount%3==2)
 	{
 		for(BYTE i = 0; i < MAX_INDEX-MAX_HUA_INDEX; i++)
 		{
@@ -987,8 +961,8 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 			BYTE nCount=0;
 			for(BYTE j = 0; j < MAX_INDEX-MAX_HUA_INDEX; j++)
 			{
-				BYTE cbCurrentCard = SwitchToCardData(j);
-				if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbCurrentCard,chr))
+				BYTE cbTestCard = SwitchToCardData(j);
+				if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbTestCard,chr))
 				{
 					if(bAdd==FALSE)
 					{
@@ -1006,16 +980,17 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 	}
 	else
 	{
-		BYTE cbCount=0;
+		BYTE nCount=0;
 		for( BYTE j = 0; j < MAX_INDEX; j++ )
 		{
-			BYTE cbCurrentCard = SwitchToCardData(j);
-			if( WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbCurrentCard,chr) )
+			BYTE cbTestCard = SwitchToCardData(j);
+			if( WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbTestCard,chr) )
 			{
-				cbHuCardData[0][cbCount++] = cbCurrentCard;
+				cbHuCardData[0][nCount++] = cbTestCard;
 			}
 		}
-		cbHuCardCount[0]=cbCount;
+		cbHuCardCount[0]=nCount;
+		cbOutCount = nCount>0 ? 1 : 0;
 	}
 
 	cbOutCardCount = cbOutCount;
@@ -1029,26 +1004,24 @@ BYTE CGameLogic::GetHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem
 	BYTE cbCardIndexTemp[MAX_INDEX];
 	CopyMemory( cbCardIndexTemp,cbCardIndex,sizeof(cbCardIndexTemp) );
 
-	BYTE cbCount = 0;
+	BYTE nCount = 0;
 	ZeroMemory(cbHuCardData,sizeof(cbHuCardData));
 
 	BYTE cbCardCount = GetCardCount(cbCardIndexTemp);
 	CChiHuRight chr;
 
-	if( (cbCardCount-2)%3 !=0 )
+	if( cbCardCount%3 != 2 )
 	{
 		for( BYTE j = 0; j < MAX_INDEX; j++ )
 		{
-			BYTE cbCurrentCard = SwitchToCardData(j);
-			if( WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbCurrentCard,chr) )
+			BYTE cbTestCard = SwitchToCardData(j);
+			if( WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbTestCard,chr) )
 			{
-				cbHuCardData[cbCount++] = cbCurrentCard;
+				cbHuCardData[nCount++] = cbTestCard;
 			}
 		}
-		if(cbCount>0)
-			return cbCount;
+		return nCount;
 	}
-
 	return 0;
 }
 
@@ -1928,7 +1901,7 @@ bool CGameLogic::IsSpGangOK(const BYTE cbCardIndex[MAX_INDEX], DWORD dwOpCode)
 	return false;
 }
 
-bool CGameLogic::IsChaseArrow(const BYTE cbCardIndex[MAX_INDEX],const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode)
+bool CGameLogic::IsChaseArrow(BYTE cbProvidedCardIndex,const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode)
 {
 	switch (dwOpCode)
 	{
@@ -1936,7 +1909,7 @@ bool CGameLogic::IsChaseArrow(const BYTE cbCardIndex[MAX_INDEX],const tagWeaveIt
 		{
 			for (int i = 0;i<cbWeaveICount;i++)
 			{
-				if (WeaveItem[i].wWeaveKind ==WIK_WIND  && (cbCardIndex[27]>0 || cbCardIndex[28]>0 || cbCardIndex[29]>0 || cbCardIndex[30]>0))
+				if (WeaveItem[i].wWeaveKind ==WIK_WIND  && (cbProvidedCardIndex>=27 && cbProvidedCardIndex<=30))
 				{
 					return true;
 				}
@@ -1947,7 +1920,7 @@ bool CGameLogic::IsChaseArrow(const BYTE cbCardIndex[MAX_INDEX],const tagWeaveIt
 		{
 			for (int i = 0;i<cbWeaveICount;i++)
 			{
-				if (WeaveItem[i].wWeaveKind == WIK_ARROW && (cbCardIndex[31]>0 || cbCardIndex[32]>0 || cbCardIndex[33]>0))	
+				if (WeaveItem[i].wWeaveKind == WIK_ARROW && (cbProvidedCardIndex>=31 && cbProvidedCardIndex<=33))	
 				{
 					return true;
 				}

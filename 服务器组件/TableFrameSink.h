@@ -113,7 +113,7 @@ protected:
 	//发牌信息
 protected:
 	BYTE							m_cbSendCardData;								//发牌扑克
-	BYTE							m_cbSendCardCount;								//发牌数目	
+	//BYTE							m_cbSendCardCount;								//发牌数目	
 
 	BYTE							m_cbRepertoryCard[MAX_REPERTORY];				//库存扑克
 	BYTE							m_cbEndLeftCount;								//荒庄牌数
@@ -126,6 +126,7 @@ protected:
 	BYTE							m_cbCardIndex[GAME_PLAYER][MAX_INDEX];			//用户扑克
 	BYTE							m_cbHandCardCount[GAME_PLAYER];					//扑克数目
 
+	BYTE							m_nChaseArrowCount;
 	BYTE							m_cbChaseArrowArray[GAME_PLAYER][MAX_CHASE_COUNT];		//长毛杠数目
 	//组合扑克
 protected:
@@ -149,9 +150,9 @@ protected:
 	//组件接口
 protected:
 	ITableFrame	*						m_pITableFrame;									//框架接口
-	tagCustomRule *					m_pGameCustomRule;							//自定规则
 	tagGameServiceOption *			m_pGameServiceOption;							//游戏配置
 	tagGameServiceAttrib *			m_pGameServiceAttrib;							//游戏属性
+	tagCustomRule					m_tGameCustomRule;							//自定规则
 
 	//函数定义
 public:
@@ -250,9 +251,13 @@ protected:
 	//发送操作
 	bool SendOperateNotify();
 
+	BYTE CreateNewBaopai();
+
+	bool UpdateBaoPaiIfNeed();
+
 	bool SendUpdateBaopaiNotify();
 
-	bool checkBaopaiExist();
+	bool CheckBaopaiExist();
 
 	//取得扑克
 	BYTE GetSendCard(bool bTail = false);
@@ -271,6 +276,7 @@ protected:
 
 	BYTE GetRemainingCount(WORD wChairID,BYTE cbCardData);
 
+	bool OnEventFenZhang();
 };
 
 #endif

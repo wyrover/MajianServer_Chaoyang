@@ -35,6 +35,8 @@
 #define MAX_HUA_COUNT				8									//花牌个数
 #define MAX_CHASE_COUNT				21									//最大长毛个数
 
+#define FENZHANG_COUNT				16									//分张 个数
+
 //扑克定义
 #define HEAP_FULL_COUNT				28									//堆立全牌
 #define MAX_RIGHT_COUNT				1									//最大权位DWORD个数	
@@ -192,8 +194,8 @@ struct CMD_S_GameStart
 	BYTE							cbHeapCardInfo[GAME_PLAYER][2];		//堆立信息
 	WORD							wUserAction;						//用户动作
 	BYTE							cbCardData[MAX_COUNT];				//麻将列表
-	BYTE							cbOutCardCount;
-	BYTE							cbOutCardData[MAX_COUNT][28];
+	//BYTE							cbOutCardCount;
+	//BYTE							cbOutCardData[MAX_COUNT][28];
 };
 
 //机器人扑克
@@ -285,7 +287,8 @@ struct CMD_S_GameConclude
 	BYTE							cbMaCount[GAME_PLAYER];							//码数			//no need
 	BYTE							cbMaData[7];							//码数据
 
-	BYTE							cbChaseArrowArray[GAME_PLAYER][MAX_CHASE_COUNT];	//长毛杠数目
+	WORD							wHuKindData;	                   //Victory classifiation
+	BYTE							cbBaopaiCardData;	                   // Bao Pai Card
 };
 
 //用户托管

@@ -21,8 +21,8 @@
 
 //动作类型
 #define WIK_GANERAL					0x00								//普通操作
-#define WIK_MING_GANG				0x01								//明杠（碰后再杠）
-#define WIK_FANG_GANG				0x02								//放杠
+#define WIK_MING_GANG				0x01								//明杠（碰后再杠）  - Means PuGang in Chaoyang
+#define WIK_FANG_GANG				0x02								//放杠				- Means MingGang in Chaoyang
 #define WIK_AN_GANG					0x03								//暗杠
 
 #define WIK_WND_GANG				0x04								//【东南西北】四张【风牌】在一起组成的杠
@@ -38,7 +38,7 @@
 #define WIK_PENG					0x0008								//碰牌类型
 #define WIK_GANG					0x0010								//杠牌类型
 #define WIK_LISTEN					0x0020								//听牌类型
-#define WIK_CHI_HU					0x0040								//吃胡类型	//no need in chaoyang
+#define WIK_CHI_HU					0x0040								//吃胡类型
 #define WIK_FANG_PAO				0x0080								//放炮
 
 //朝阳麻将 Additional Flag
@@ -48,20 +48,30 @@
 #define WIK_CHASEWIND				0x0800							//【东南西北】的杠追加风牌后的杠
 #define WIK_UPDATE_BAO				0x8000							// UPDATED BAO PAI
 
+
+// Hu Kind
+
+#define WIK_NORMAL  				0x0000								//没有类型
+#define WIK_KIND_HU					0x0040								//吃胡类型
+#define WIK_KIND_JIN_BAO			0x0080								
+
 //////////////////////////////////////////////////////////////////////////
 //胡牌定义
 
 #define CHR_PING_HU					0x00000001							//平胡
 #define CHR_PENG_PENG				0x00000002							//碰碰胡
-#define CHR_DAN_DIAN_QI_DUI	0x00000004							//单点七对
+#define CHR_DAN_DIAN_QI_DUI			0x00000004							//单点七对
 #define CHR_MA_QI_DUI				0x00000008							//麻七对
-#define CHR_MA_QI_WANG			0x00000010							//麻七王
+#define CHR_MA_QI_WANG				0x00000010							//麻七王
 #define CHR_MA_QI_WZW				0x00000020							//麻七王中王
-#define CHR_SHI_SAN_LAN			0x00000040							//十三烂
-#define CHR_QX_SHI_SAN_LAN		0x00000080							//七星十三烂
+#define CHR_SHI_SAN_LAN				0x00000040							//十三烂
+#define CHR_QX_SHI_SAN_LAN			0x00000080							//七星十三烂
 #define CHR_TIAN_HU					0x00000100							//天胡
-#define CHR_DI_HU						0x00000200							//地胡
-#define CHR_QI_SHOU_LISTEN		0x00000400							//起首听
+#define CHR_DI_HU					0x00000200							//地胡
+#define CHR_QI_SHOU_LISTEN			0x00000400							//起首听
+#define CHR_JIN_BAO					0x00000800							//进宝      // After this, must check Ting status
+
+#define CHR_FEN_ZHANG				0x00008000							//分张
 
 
 
@@ -187,6 +197,7 @@ class CGameLogic
 protected:
 	static const BYTE				m_cbCardDataArray[MAX_REPERTORY];	//扑克数据
 	BYTE							m_cbMagicIndex;						//钻牌索引
+	BYTE							m_cbBaopaiIndex;					//宝牌索引
 	tagCustomRule					m_CustomRule;						//定制规则
 
 	//函数定义
@@ -221,6 +232,10 @@ public:
 	void SetMagicIndex(BYTE cbMagicIndex) { m_cbMagicIndex = cbMagicIndex; }
 	//财神判断
 	bool IsMagicCard(BYTE cbCardData);
+	//设置财神
+	void SetBaopaiIndex(BYTE cbBaoPaiIndex) { m_cbBaopaiIndex = cbBaoPaiIndex; }
+	//财神判断
+	bool IsBaoPaiCard(BYTE cbCardData);
 	//花牌判断
 	bool IsHuaCard(BYTE cbCardData);
 	//花牌判断
@@ -256,11 +271,11 @@ public:
 	//杠牌分析
 	WORD AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbProvideCard, tagGangCardResult & GangCardResult, BYTE cbDiscardCount);
 	//吃胡分析
-	BYTE AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbCurrentCard, CChiHuRight &ChiHuRight,bool b4HZHu=false);
+	BYTE AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbCurrentCard, CChiHuRight &ChiHuRight,bool bTingStatus=false);
 	//听牌分析
 	BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);
 	//听牌分析，获取打那些牌能听，以及能胡哪些牌
-	BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbOutCard[][28]);
+	//BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbOutCard[][28]);
 	BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE& cbOutCardCount,BYTE cbOutCardData[],BYTE cbHuCardCount[],BYTE cbHuCardData[][28]);
 	//获取胡牌数据，听牌后调用
 	BYTE GetHuCard( const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbHuCardData[]);
@@ -328,7 +343,7 @@ public:
 	//设置定制规则
 	void SetCustomRule(tagCustomRule *pRule);
 
-	bool IsChaseArrow(const BYTE cbCardIndex[MAX_INDEX],const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode);
+	bool IsChaseArrow(BYTE cbProvidedCardIndex,const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode);
 };
 
 //////////////////////////////////////////////////////////////////////////////////
