@@ -72,6 +72,7 @@ CTableFrameSink::CTableFrameSink()
 
 	ZeroMemory(m_cbDiscardCard, sizeof(m_cbDiscardCard));
 	ZeroMemory(m_cbDiscardCount, sizeof(m_cbDiscardCount));
+	ZeroMemory(m_cbOutFromHandCount, sizeof(m_cbOutFromHandCount));
 
 	//出牌信息
 	m_cbMinusHeadCount = 0;
@@ -192,6 +193,7 @@ VOID CTableFrameSink::RepositionSink()
 
 	ZeroMemory(m_cbDiscardCard, sizeof(m_cbDiscardCard));
 	ZeroMemory(m_cbDiscardCount, sizeof(m_cbDiscardCount));
+	ZeroMemory(m_cbOutFromHandCount, sizeof(m_cbOutFromHandCount));
 
 	//扑克信息
 	ZeroMemory(m_cbCardIndex, sizeof(m_cbCardIndex));
@@ -399,7 +401,7 @@ bool CTableFrameSink::OnEventGameStart()
 
 	//杠牌判断
 	tagGangCardResult GangCardResult;
-	m_wUserAction[m_wBankerUser]|=m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[m_wBankerUser],NULL,0,0,GangCardResult, m_cbDiscardCount[m_wBankerUser]);
+	m_wUserAction[m_wBankerUser]|=m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[m_wBankerUser],NULL,0,0,GangCardResult, m_cbOutFromHandCount[m_wBankerUser]);
 
 	//胡牌判断
 	CChiHuRight chr;
@@ -1105,6 +1107,8 @@ bool CTableFrameSink::OnUserOutCard(WORD wChairID, BYTE cbCardData,bool bSysOut/
 		m_wCurrentUser = (m_wCurrentUser+1)%m_cbPlayerCount;
 	}
 
+	m_cbOutFromHandCount[wChairID]++;
+
 	//响应判断
  	bool bAroseAction = EstimateUserRespond(wChairID, cbCardData, EstimatKind_OutCard);
  
@@ -1113,7 +1117,7 @@ bool CTableFrameSink::OnUserOutCard(WORD wChairID, BYTE cbCardData,bool bSysOut/
 		m_bGangOutCard = true;
 		m_cbGangStatus = WIK_GANERAL;
 		m_wProvideGangUser = INVALID_CHAIR;
-	}	
+	}
 	else
 	{
 		m_bGangOutCard = false;
@@ -1395,7 +1399,7 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 			m_cbProvideCard = 0;
 
  			tagGangCardResult gcr;
- 			m_wUserAction[wTargetUser] |= m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wTargetUser], m_WeaveItemArray[wTargetUser], m_cbWeaveItemCount[wTargetUser],0, gcr, m_cbDiscardCount[wTargetUser]);
+ 			m_wUserAction[wTargetUser] |= m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wTargetUser], m_WeaveItemArray[wTargetUser], m_cbWeaveItemCount[wTargetUser],0, gcr, m_cbOutFromHandCount[wTargetUser]);
 
 			if(m_bTing[wTargetUser] == false)
 			{
@@ -1612,6 +1616,8 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 
 		case WIK_ARROW:			//中发白
 			{
+				m_enSendStatus = Gang_Send;
+
 				//变量定义
 				BYTE cbWeaveIndex;
 
@@ -1638,7 +1644,7 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				m_cbGangCount[wChairID]++;
 
 				tagGangCardResult gcr;
-				m_wUserAction[wChairID] |= m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wChairID], m_WeaveItemArray[wChairID], m_cbWeaveItemCount[wChairID],0, gcr, m_cbDiscardCount[wChairID]);
+				m_wUserAction[wChairID] |= m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wChairID], m_WeaveItemArray[wChairID], m_cbWeaveItemCount[wChairID],0, gcr, m_cbOutFromHandCount[wChairID]);
 
 				//构造结果
 				CMD_S_OperateResult OperateResult;
@@ -2222,7 +2228,7 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 		{
 			tagGangCardResult GangCardResult;
 			m_wUserAction[wCurrentUser] |= m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wCurrentUser],
-				m_WeaveItemArray[wCurrentUser], m_cbWeaveItemCount[wCurrentUser],m_cbSendCardData ,GangCardResult, m_cbDiscardCount[wCurrentUser]);
+				m_WeaveItemArray[wCurrentUser], m_cbWeaveItemCount[wCurrentUser],m_cbSendCardData ,GangCardResult, m_cbOutFromHandCount[wCurrentUser]);
 		}
 	}
 
@@ -2272,7 +2278,7 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 	if( m_bTing[wCurrentUser] && (SendCard.wActionMask&WIK_LISTEN)!=0 ){
 		SendCard.wActionMask ^= WIK_LISTEN;
 	}
-	SendCard.cbCardData = m_cbProvideCard;
+	SendCard.cbCardData = m_cbSendCardData;
 
 	//发送数据
 	m_pITableFrame->SendTableData(INVALID_CHAIR,SUB_S_SEND_CARD, &SendCard, sizeof(SendCard));

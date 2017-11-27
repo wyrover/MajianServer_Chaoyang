@@ -775,7 +775,7 @@ WORD CGameLogic::AnalyseGangCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 
 WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], 
 								   BYTE cbWeaveCount,BYTE cbProvideCard, 
-								   tagGangCardResult & GangCardResult, BYTE cbDiscardCount)
+								   tagGangCardResult & GangCardResult, BYTE cbOutCount)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//…Ë÷√±‰¡ø
@@ -808,7 +808,7 @@ WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagW
 
 	bool bXuanFeng = false;
 	bool bChangMao = false;
-	if( m_CustomRule.bEnabled_FengGang && cbDiscardCount<1){
+	if( m_CustomRule.bEnabled_FengGang && cbOutCount<1){
 		bXuanFeng = true;
 	}
 	if( m_CustomRule.bEnabled_ChangMaoGang){
@@ -824,11 +824,14 @@ WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagW
 		wActionMask |= WIK_ARROW;
 	}
 
-	if ( bChangMao && IsChaseArrow(cbProvideCard,WeaveItem,cbWeaveCount,WIK_CHASEWIND))
+	BYTE cbProvideCardIndex = INVAILD_CARD_INDEX;
+	if( IsValidCard(cbProvideCard) ) cbProvideCardIndex = SwitchToCardIndex(cbProvideCard);
+
+	if ( bChangMao && IsChaseArrow(cbProvideCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEWIND))
 	{
 		wActionMask |= WIK_CHASEWIND;
 	}
-	if ( bChangMao && IsChaseArrow(cbProvideCard,WeaveItem,cbWeaveCount,WIK_CHASEARROW))			//m_CustomRule.cbZhuiFeng && 
+	if ( bChangMao && IsChaseArrow(cbProvideCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEARROW))			//m_CustomRule.cbZhuiFeng && 
 	{
 		wActionMask |= WIK_CHASEARROW;
 	}

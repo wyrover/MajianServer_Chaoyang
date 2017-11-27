@@ -12,8 +12,6 @@
 using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 
-#define INVAILD_CARD_INDEX          0xFF
-
 //效验类型
 enum enEstimatKind
 {
@@ -109,6 +107,8 @@ protected:
 	BYTE							m_cbOutCardCount;								//出牌数目
 	BYTE							m_cbDiscardCount[GAME_PLAYER];					//丢弃数目
 	BYTE							m_cbDiscardCard[GAME_PLAYER][60];				//丢弃记录
+
+	BYTE							m_cbOutFromHandCount[GAME_PLAYER];					// added for ChangMaoGang
 
 	//发牌信息
 protected:
