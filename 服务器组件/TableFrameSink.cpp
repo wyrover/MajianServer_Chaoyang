@@ -406,7 +406,7 @@ bool CTableFrameSink::OnEventGameStart()
 	//ºúÅÆÅÐ¶Ï
 	CChiHuRight chr;
 	m_cbCardIndex[m_wBankerUser][m_GameLogic.SwitchToCardIndex(m_cbSendCardData)]--;
-	m_wUserAction[m_wBankerUser]|=m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[m_wBankerUser],NULL,0,m_cbSendCardData,chr, false);
+	m_wUserAction[m_wBankerUser]|=m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[m_wBankerUser],NULL,0,m_cbSendCardData,chr);
 	m_cbCardIndex[m_wBankerUser][m_GameLogic.SwitchToCardIndex(m_cbSendCardData)]++;
 	m_cbHandCardCount[m_wBankerUser]++;
 
@@ -420,7 +420,8 @@ bool CTableFrameSink::OnEventGameStart()
 		cbCount =m_GameLogic.AnalyseTingCard(m_cbCardIndex[m_wBankerUser],0,0,HuData.cbOutCardCount,HuData.cbOutCardData,HuData.cbHuCardCount,HuData.cbHuCardData);
 		if(cbCount >0)
 		{
-			m_wUserAction[m_wBankerUser] |= WIK_LISTEN;
+			if( m_GameLogic.isPossibleTing(m_WeaveItemArray[m_wBankerUser], m_cbWeaveItemCount[m_wBankerUser]) )
+				m_wUserAction[m_wBankerUser] |= WIK_LISTEN;
 			for(int i=0;i<MAX_COUNT;i++)
 			{
 				if(HuData.cbHuCardCount[i]>0)
@@ -1259,7 +1260,7 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
  				//ºúÅÆÅÐ¶Ï
  				BYTE cbWeaveItemCount = m_cbWeaveItemCount[wChiHuUser];
  				tagWeaveItem * pWeaveItem = m_WeaveItemArray[wChiHuUser];
- 				m_dwChiHuKind[wChiHuUser] = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[wChiHuUser], pWeaveItem, cbWeaveItemCount, m_cbChiHuCard, m_ChiHuRight[wChiHuUser], m_bTing[wChiHuUser]);
+ 				m_dwChiHuKind[wChiHuUser] = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[wChiHuUser], pWeaveItem, cbWeaveItemCount, m_cbChiHuCard, m_ChiHuRight[wChiHuUser]);
 
  				//²åÈëÆË¿Ë
  				if (m_dwChiHuKind[wChiHuUser] != WIK_NORMAL) 
@@ -1409,7 +1410,8 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				cbCount =m_GameLogic.AnalyseTingCard(m_cbCardIndex[wTargetUser],m_WeaveItemArray[wTargetUser],m_cbWeaveItemCount[wTargetUser],HuData.cbOutCardCount,HuData.cbOutCardData,HuData.cbHuCardCount,HuData.cbHuCardData);
 				if(cbCount >0)
 				{
-					m_wUserAction[wTargetUser] |= WIK_LISTEN; 
+					if( m_GameLogic.isPossibleTing(m_WeaveItemArray[wTargetUser], m_cbWeaveItemCount[wTargetUser]) )
+						m_wUserAction[wTargetUser] |= WIK_LISTEN; 
 
 					for(int i=0;i<MAX_COUNT;i++)
 					{
@@ -1803,6 +1805,10 @@ bool CTableFrameSink::OnUserListenCard(WORD wChairID, bool bListenCard)
 		ASSERT(!m_bTing[wChairID]);
 		if(WIK_LISTEN == m_GameLogic.AnalyseTingCard(m_cbCardIndex[wChairID], m_WeaveItemArray[wChairID], m_cbWeaveItemCount[wChairID]))
 		{
+			bool bTing = m_GameLogic.isPossibleTing(m_WeaveItemArray[wChairID], m_cbWeaveItemCount[wChairID]);
+			ASSERT(bTing);
+			if( !bTing ) return false;
+
 			m_bTing[wChairID] = true;
 			CMD_S_ListenCard ListenCard;
 			ZeroMemory(&ListenCard,sizeof(ListenCard));
@@ -2221,6 +2227,25 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 			m_wUserAction[wCurrentUser] |= m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[wCurrentUser], m_WeaveItemArray[wCurrentUser],
 				m_cbWeaveItemCount[wCurrentUser], m_cbProvideCard, chr);
 			m_cbCardIndex[wCurrentUser][m_GameLogic.SwitchToCardIndex(m_cbProvideCard)]++;
+
+			if( m_GameLogic.IsBaoPaiCard(m_cbProvideCard) && m_bTing[wCurrentUser] ){ // for the TEST 
+				chr |= CHR_JIN_BAO;
+
+				m_ChiHuRight[wCurrentUser] = chr;
+				if(!m_GameLogic.RemoveCard(m_cbCardIndex[wCurrentUser], &m_cbProvideCard, 1))
+				{
+					ASSERT(FALSE);
+					return false;
+				}
+
+				//½áÊøÐÅÏ¢
+				m_cbChiHuCard = m_cbProvideCard;
+				m_cbSendCardData = m_cbProvideCard;
+
+				//½áÊøÓÎÏ·
+				OnEventGameConclude(m_wProvideUser, NULL, GER_NORMAL);
+
+			}
 		}
 
 		//¸ÜÅÆÅÐ¶Ï
@@ -2246,18 +2271,18 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 		cbCount =m_GameLogic.AnalyseTingCard(m_cbCardIndex[wCurrentUser],m_WeaveItemArray[wCurrentUser],m_cbWeaveItemCount[wCurrentUser],HuData.cbOutCardCount,HuData.cbOutCardData,HuData.cbHuCardCount,HuData.cbHuCardData);		
 
 	} else {
-		CChiHuRight chr;
 		m_cbCardIndex[wCurrentUser][m_GameLogic.SwitchToCardIndex(m_cbProvideCard)]--;
 		cbCount =m_GameLogic.AnalyseTingCard(m_cbCardIndex[wCurrentUser],m_WeaveItemArray[wCurrentUser],m_cbWeaveItemCount[wCurrentUser],HuData.cbOutCardCount,HuData.cbOutCardData,HuData.cbHuCardCount,HuData.cbHuCardData);
 		m_cbCardIndex[wCurrentUser][m_GameLogic.SwitchToCardIndex(m_cbProvideCard)]++;
 
 		if(cbCount >0) {
-			HuData.cbOutCardData[HuData.cbOutCardCount++] = m_cbProvideCard;
+			HuData.cbOutCardData[0] = m_cbProvideCard;
 		}
 	}
 
 	if(cbCount >0) {
-		m_wUserAction[wCurrentUser] |= WIK_LISTEN; 
+		if( !m_tGameCustomRule.bEnabled_ZhanLiHu || m_cbWeaveItemCount[wCurrentUser]>0 )
+			m_wUserAction[wCurrentUser] |= WIK_LISTEN; 
 
 		for(int i=0;i<MAX_COUNT;i++)
 		{
@@ -2660,14 +2685,22 @@ bool CTableFrameSink::OnActionUserOffLine(WORD wChairID, IServerUserItem * pISer
 
 bool CTableFrameSink::OnEventFenZhang()
 {
+	OutputDebugStringA("\n\t\t");OutputDebugStringA(__FUNCTION__);
 	WORD chiHuUserId = INVALID_CHAIR;
 	for( int i=0; i<GAME_PLAYER; i++){
 		WORD playerIndex = (m_wCurrentUser + i) % GAME_PLAYER;
 
 		BYTE cardData = GetSendCard();
 		m_dwChiHuKind[playerIndex] = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[playerIndex], m_WeaveItemArray[playerIndex],
-			m_cbWeaveItemCount[playerIndex], cardData, m_ChiHuRight[playerIndex], m_bTing[playerIndex]);
-		if( (m_dwChiHuKind[playerIndex]&WIK_KIND_HU) != 0){
+			m_cbWeaveItemCount[playerIndex], cardData, m_ChiHuRight[playerIndex]);
+
+		if( m_GameLogic.IsBaoPaiCard(cardData) && m_bTing[playerIndex] ){
+			m_dwChiHuKind[playerIndex] |= WIK_KIND_HU;			
+			m_ChiHuRight[playerIndex] |= CHR_JIN_BAO;
+		}
+
+		if( (m_dwChiHuKind[playerIndex]&WIK_KIND_HU) == WIK_KIND_HU){
+
 			chiHuUserId = playerIndex;
 			m_ChiHuRight[playerIndex] |= CHR_FEN_ZHANG;
 			m_cbCardIndex[playerIndex][m_GameLogic.SwitchToCardIndex(cardData)]++;

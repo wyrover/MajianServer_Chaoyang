@@ -55,7 +55,7 @@
 
 #define WIK_NORMAL  				0x0000								//没有类型
 #define WIK_KIND_HU					0x0040								//吃胡类型
-#define WIK_KIND_JIN_BAO			0x0080								
+//#define WIK_KIND_JIN_BAO			0x0080								
 
 //////////////////////////////////////////////////////////////////////////
 //胡牌定义
@@ -273,12 +273,14 @@ public:
 	//杠牌分析
 	WORD AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbProvideCard, tagGangCardResult & GangCardResult, BYTE cbDiscardCount);
 	//吃胡分析
-	BYTE AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbCurrentCard, CChiHuRight &ChiHuRight,bool bTingStatus=false);
+	BYTE AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbCurrentCard, CChiHuRight &ChiHuRight/*,bool bTingStatus=false*/);
 	//听牌分析
 	BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);
 	//听牌分析，获取打那些牌能听，以及能胡哪些牌
 	//BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbOutCard[][28]);
 	BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE& cbOutCardCount,BYTE cbOutCardData[],BYTE cbHuCardCount[],BYTE cbHuCardData[][28]);
+	// Check Ting conditions
+	bool isPossibleTing(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);
 	//获取胡牌数据，听牌后调用
 	BYTE GetHuCard( const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbHuCardData[]);
 	BYTE GetRandHuiPaiCard( );

@@ -842,8 +842,8 @@ WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagW
 //吃胡分析
 BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX], 
 								  const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, 
-								  BYTE cbCurrentCard, CChiHuRight &ChiHuRight,
-								  bool bTingStatus/*=false*/)
+								  BYTE cbCurrentCard, CChiHuRight &ChiHuRight
+								  /*, bool bTingStatus=false*/)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//变量定义
@@ -866,11 +866,6 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX],
 	if (cbCurrentCard!=0)
 		cbCardIndexTemp[SwitchToCardIndex(cbCurrentCard)]++;
 
-	if( IsBaoPaiCard(cbCurrentCard) && bTingStatus ){
-		cbChiHuKind = WIK_CHI_HU;
-
-		ChiHuRight |= CHR_JIN_BAO;
-	}
 		
 	//分析扑克
 	AnalyseCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,AnalyseItemArray);
@@ -889,8 +884,8 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX],
 // 				ChiHuRight |= CHR_PENG_PENG;
 // 			}
 // 		}
-
-		ChiHuRight |= CHR_PING_HU;
+		if( m_CustomRule.bEnabled_ZhanLiHu || isOpenedKaimen(WeaveItem,cbWeaveCount))
+			ChiHuRight |= CHR_PING_HU;
 	}
 
 	if(!ChiHuRight.IsEmpty())
@@ -953,7 +948,7 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 	BYTE cbCardCount = GetCardCount(cbCardIndexTemp);
 	CChiHuRight chr;
 
-	if(cbCardCount%3==2)
+	if(cbCardCount%3 == 2)
 	{
 		for(BYTE i = 0; i < MAX_INDEX-MAX_HUA_INDEX; i++)
 		{
@@ -998,6 +993,26 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 
 	cbOutCardCount = cbOutCount;
 	return cbOutCount;
+}
+
+// Check Ting condition
+bool CGameLogic::isPossibleTing(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount){
+	for(int i=0; i<cbWeaveCount; i++){
+		if( WeaveItem[i].wWeaveKind&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) )
+			return true;
+	}
+	return false;
+}
+
+// Check Kaimen condition 开门
+bool CGameLogic::isOpenedKaimen(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount){
+	for(int i=0; i<cbWeaveCount; i++){
+		if( WeaveItem[i].wWeaveKind&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) )
+			return true;
+		if( (WeaveItem[i].wWeaveKind&(WIK_GANG)) && (WeaveItem[i].cbParam&WIK_AN_GANG)==0)
+			return true;
+	}
+	return false;
 }
 
 BYTE CGameLogic::GetHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbHuCardData[])
@@ -1364,7 +1379,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 		//牌眼判断
 		for (BYTE i=0;i<MAX_INDEX;i++)
 		{
-			// isValidKezi
+			// isValidDuiZi
 			if (cbCardIndex[i]==2 || (IsValidCard(SwitchToCardData(m_cbMagicIndex)) && i != m_cbMagicIndex && cbCardIndex[m_cbMagicIndex]+cbCardIndex[i]==2))
 			{
 				//变量定义
