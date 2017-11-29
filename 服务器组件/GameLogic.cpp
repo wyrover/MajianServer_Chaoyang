@@ -8,6 +8,34 @@
 bool		CChiHuRight::m_bInit = false;
 DWORD		CChiHuRight::m_dwRightMask[MAX_RIGHT_COUNT];
 
+#ifdef CARD_DISPATCHER_CONTROL
+
+void CGameLogic::printLogAnalyseItems(CAnalyseItemArray* arr){
+	CStringA strLog;
+	CStringA temp;
+	CStringA strFormat="\n\t\t";
+
+	for(int i=0; i<arr->GetCount(); i++){
+		for( int j=0; j<MAX_WEAVE; j++){
+			BYTE *cardData = arr->GetAt(i).cbCardData[j];
+			WORD kind = arr->GetAt(i).wWeaveKind[j];
+			if( kind==WIK_GANG || kind==WIK_WIND){
+				temp.Format("{%d, %d, %d, %d}", cardData[0], cardData[1], cardData[2], cardData[3]);
+			} else {
+				temp.Format("{%d, %d, %d}", cardData[0], cardData[1], cardData[2]);
+			}
+			strFormat += "-"+temp;
+		}
+		BYTE bEndCard = arr->GetAt(i).bMagicEye ? SwitchToCardData(m_cbMagicIndex) : arr->GetAt(i).cbCardEye;
+		temp.Format("{%d, %d}", arr->GetAt(i).cbCardEye, bEndCard);
+		strFormat += "-"+temp;
+	}
+	OutputDebugStringA(strFormat);
+
+}
+
+#endif	//CARD_DISPATCHER_CONTROL
+
 //构造函数
 CChiHuRight::CChiHuRight()
 {
@@ -254,7 +282,7 @@ const BYTE CGameLogic::m_cbCardDataArray[MAX_REPERTORY]=
 CGameLogic::CGameLogic()
 {
 	InitCustomRule();
-	m_cbMagicIndex = MAX_INDEX;
+	m_cbMagicIndex = INVAILD_CARD_INDEX;
 }
 
 //析构函数
@@ -524,24 +552,6 @@ WORD CGameLogic::GetChiHuTime(const CChiHuRight & ChiHuRight)
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	WORD wFanShu = 1;//平胡一倍
 
-	if(!(ChiHuRight&CHR_TIAN_HU).IsEmpty())
-		wFanShu=16;
-	else if(!(ChiHuRight&CHR_QI_SHOU_LISTEN).IsEmpty())//起首听
-		wFanShu=8;
-	else if(!(ChiHuRight&CHR_PENG_PENG).IsEmpty())//碰碰胡
-		wFanShu=3;
-	else if(!(ChiHuRight&CHR_DAN_DIAN_QI_DUI).IsEmpty())//单点大七对
-		wFanShu=6;
-	else if(!(ChiHuRight&CHR_MA_QI_DUI).IsEmpty())//麻七对
-		wFanShu=5;
-	else if(!(ChiHuRight&CHR_MA_QI_WANG).IsEmpty())//麻七王
-		wFanShu=10;
-	else if(!(ChiHuRight&CHR_MA_QI_WZW).IsEmpty())//麻七王中王
-		wFanShu=20;
-	else if(!(ChiHuRight&CHR_SHI_SAN_LAN).IsEmpty())//十三烂
-		wFanShu=2;
-	else if(!(ChiHuRight&CHR_QX_SHI_SAN_LAN).IsEmpty())//七星十三烂
-		wFanShu=4;
 
 	if(!(ChiHuRight&CHR_GANG_SHANG_HUA).IsEmpty())//杠上开花
 		wFanShu *= 2;
@@ -562,7 +572,7 @@ BYTE CGameLogic::AutomatismOutCard(const BYTE cbCardIndex[MAX_INDEX], const BYTE
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	// 先打财神
-	if(m_cbMagicIndex != MAX_INDEX)
+	if(m_cbMagicIndex != INVAILD_CARD_INDEX)
 	{
 		if(cbCardIndex[m_cbMagicIndex] > 0)
 		{
@@ -572,7 +582,7 @@ BYTE CGameLogic::AutomatismOutCard(const BYTE cbCardIndex[MAX_INDEX], const BYTE
 
 	//而后打字牌，字牌打自己多的，数目一样就按东南西北中发白的顺序
 	BYTE cbCardData = 0;
-	BYTE cbOutCardIndex  = MAX_INDEX;
+	BYTE cbOutCardIndex  = INVAILD_CARD_INDEX;
 	BYTE cbOutCardIndexCount = 0;
 	for(int i = MAX_INDEX - 7; i < MAX_INDEX - 1; i++)
 	{
@@ -583,7 +593,7 @@ BYTE CGameLogic::AutomatismOutCard(const BYTE cbCardIndex[MAX_INDEX], const BYTE
 		}
 	}
 
-	if(cbOutCardIndex != MAX_INDEX)
+	if(cbOutCardIndex != INVAILD_CARD_INDEX)
 	{
 		cbCardData = SwitchToCardData(cbOutCardIndex);
 		bool bEnjoinCard = false;
@@ -605,7 +615,7 @@ BYTE CGameLogic::AutomatismOutCard(const BYTE cbCardIndex[MAX_INDEX], const BYTE
 	{
 		for(int j = 0; j < 3; j++)
 		{
-			cbOutCardIndex  = MAX_INDEX;
+			cbOutCardIndex  = INVAILD_CARD_INDEX;
 			if(cbCardIndex[j * 9 + i] > 0)
 			{
 				cbOutCardIndex = j * 9 + i;
@@ -615,7 +625,7 @@ BYTE CGameLogic::AutomatismOutCard(const BYTE cbCardIndex[MAX_INDEX], const BYTE
 				cbOutCardIndex = j * 9 + (9 - i - 1);
 			}
 
-			if(cbOutCardIndex != MAX_INDEX)
+			if(cbOutCardIndex != INVAILD_CARD_INDEX)
 			{
 				BYTE cbCardDataTemp = SwitchToCardData(cbOutCardIndex);
 				bool bEnjoinCard = false;
@@ -667,7 +677,7 @@ BYTE CGameLogic::EstimateEatCard(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCurre
 
 	//如果有财神
 	BYTE cbMagicCardCount = 0;
-	if(m_cbMagicIndex != MAX_INDEX)
+	if(m_cbMagicIndex != INVAILD_CARD_INDEX)
 	{
 		cbMagicCardCount = cbCardIndex[m_cbMagicIndex];
 		//如果财神有代替牌，财神与代替牌转换
@@ -690,7 +700,7 @@ BYTE CGameLogic::EstimateEatCard(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCurre
 			cbFirstIndex=cbCurrentIndex-cbExcursion[i];
 
 			//吃牌不能包含有财神
-			if(m_cbMagicIndex != MAX_INDEX &&
+			if(m_cbMagicIndex != INVAILD_CARD_INDEX &&
 				m_cbMagicIndex >= cbFirstIndex && m_cbMagicIndex <= cbFirstIndex+2) continue;
 
 			if ((cbCurrentIndex!=cbFirstIndex)&&(cbMagicCardIndex[cbFirstIndex]==0))
@@ -873,19 +883,33 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX],
 	//胡牌分析
 	if (AnalyseItemArray.GetCount()>0)
 	{
+
+
+#ifdef CARD_DISPATCHER_CONTROL
+		if( AnalyseItemArray.GetCount()>1 ){	// for the TEST
+			printLogAnalyseItems(&AnalyseItemArray);
+		}
+#endif // CARD_DISPATCHER_CONTROL
+
 		//牌型分析
-// 		for (int i=0;i<AnalyseItemArray.GetCount();i++)
-// 		{
-// 			//变量定义
-// 			tagAnalyseItem * pAnalyseItem=&AnalyseItemArray[i];
-//  			//碰碰胡
-//  		if(IsPengPeng(pAnalyseItem)) 
-// 			{
-// 				ChiHuRight |= CHR_PENG_PENG;
-// 			}
-// 		}
-		if( m_CustomRule.bEnabled_ZhanLiHu || isOpenedKaimen(WeaveItem,cbWeaveCount))
+		if( m_CustomRule.bEnabled_ZhanLiHu || isOpenedKaimen(WeaveItem,cbWeaveCount)) {
 			ChiHuRight |= CHR_PING_HU;
+			
+			if( IsQingYiSe(&AnalyseItemArray[0]) ) {
+				ChiHuRight |= CHR_QING_YI_SE;
+			}
+
+			if( cbWeaveCount>=4 )
+				ChiHuRight |= CHR_SHOU_BA_YI;
+			
+			if( IsShiSanLan(cbCardIndex, cbWeaveCount, ChiHuRight) ){
+				ChiHuRight |= CHR_SHI_SAN_YAO;
+			}
+
+			if( IsJiaHuFormat(cbCurrentCard, &AnalyseItemArray[0], cbWeaveCount) ){
+				ChiHuRight |= CHR_JIA_HU;
+			}
+		}
 	}
 
 	if(!ChiHuRight.IsEmpty())
@@ -1055,6 +1079,8 @@ BYTE CGameLogic::SwitchToCardData(BYTE cbCardIndex)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	ASSERT(cbCardIndex<MAX_INDEX);
+	if( cbCardIndex>=MAX_INDEX ) return INVAILD_CARD_DATA;
+
 	if(cbCardIndex < 27)
 		return ((cbCardIndex/9)<<4)|(cbCardIndex%9+1);
 	else return (0x30|(cbCardIndex-27+1));
@@ -1065,6 +1091,8 @@ BYTE CGameLogic::SwitchToCardIndex(BYTE cbCardData)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	ASSERT(IsValidCard(cbCardData));
+	if( !IsValidCard(cbCardData) ) return INVAILD_CARD_INDEX;
+
 	return ((cbCardData & MASK_COLOR) >> 4) * 9 + (cbCardData & MASK_VALUE) - 1;
 }
 
@@ -1075,7 +1103,7 @@ BYTE CGameLogic::SwitchToCardData(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCard
 	//转换扑克
 	BYTE cbPosition=0;
 	//财神
-	if(m_cbMagicIndex != MAX_INDEX)
+	if(m_cbMagicIndex != INVAILD_CARD_INDEX)
 	{
 		for(BYTE i = 0; i < cbCardIndex[m_cbMagicIndex]; i++)
 			cbCardData[cbPosition++] = SwitchToCardData(m_cbMagicIndex);
@@ -1354,8 +1382,8 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 	BYTE cbCardCount=GetCardCount(cbCardIndex);
 
 	//效验数目
-	ASSERT((cbCardCount>=2)&&(cbCardCount<=MAX_COUNT)&&((cbCardCount-2)%3==0));
-	if ((cbCardCount<2)||(cbCardCount>MAX_COUNT)||((cbCardCount-2)%3!=0))
+	ASSERT((cbCardCount>=2)&&(cbCardCount<=MAX_COUNT)&&(cbCardCount%3==2));
+	if ((cbCardCount<2)||(cbCardCount>MAX_COUNT)||(cbCardCount%3!=2))
 		return false;
 
 	//变量定义
@@ -1398,10 +1426,12 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 				else AnalyseItem.bMagicEye = false;
 				AnalyseItem.cbCardEye=cbCardIndex[i]==0?SwitchToCardData(cbCardIndex[m_cbMagicIndex]):SwitchToCardData(i);
 
-				//插入结果
-				AnalyseItemArray.Add(AnalyseItem);
+				if( isPossibleHu(&AnalyseItem) ) {
+					//插入结果
+					AnalyseItemArray.Add(AnalyseItem);
 
-				return true;
+					return true;
+				}
 			}
 		}
 
@@ -1434,8 +1464,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 			//同牌判断
 			//如果是财神,并且财神数小于3,则不进行组合
 			if(cbMagicCardIndex[i] >= 3 || (cbMagicCardIndex[i]+cbMagicCardCount >= 3 &&
-				((INDEX_REPLACE_CARD!=MAX_INDEX && i != INDEX_REPLACE_CARD) || (INDEX_REPLACE_CARD==MAX_INDEX && i != m_cbMagicIndex)))
-				)
+				((INDEX_REPLACE_CARD!=MAX_INDEX && i != INDEX_REPLACE_CARD) || (INDEX_REPLACE_CARD==MAX_INDEX && i != m_cbMagicIndex))))
 			{
 				int nTempIndex = cbMagicCardIndex[i];
 				do
@@ -1495,7 +1524,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 			}
 
 			//连牌判断 // 顺字牌
-			if ((i<3*9-2)&&((i%9)<7))
+			if (i<3*9 && ((i%9)<7))
 			{
 				//只要财神牌数加上3个顺序索引的牌数大于等于3,则进行组合
 				if(cbMagicCardCount+cbMagicCardIndex[i]+cbMagicCardIndex[i+1]+cbMagicCardIndex[i+2] >= 3)
@@ -1581,7 +1610,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 					BYTE cbCardIndex=pKindItem[i/3]->cbValidIndex[i%3]; 
 					if (cbCardIndexTemp[cbCardIndex]==0)
 					{
-						if(m_cbMagicIndex != MAX_INDEX && cbCardIndexTemp[m_cbMagicIndex] > 0)
+						if(m_cbMagicIndex != INVAILD_CARD_INDEX && cbCardIndexTemp[m_cbMagicIndex] > 0)
 						{											
 							pKindItem[i/3]->cbValidIndex[i%3] = m_cbMagicIndex;
 							cbCardIndexTemp[m_cbMagicIndex]--;
@@ -1603,7 +1632,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 					bool bMagicEye = false;
 					if(GetCardCount(cbCardIndexTemp) == 2)
 					{
-						if(m_cbMagicIndex != MAX_INDEX && cbCardIndexTemp[m_cbMagicIndex]==2)
+						if(m_cbMagicIndex != INVAILD_CARD_INDEX && cbCardIndexTemp[m_cbMagicIndex]==2)
 						{
 							cbCardEye = SwitchToCardData(m_cbMagicIndex);
 							bMagicEye = true;
@@ -1615,13 +1644,13 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 								if (cbCardIndexTemp[i]==2)
 								{
 									cbCardEye=SwitchToCardData(i);
-									if(m_cbMagicIndex != MAX_INDEX && i == m_cbMagicIndex) 
+									if(m_cbMagicIndex != INVAILD_CARD_INDEX && i == m_cbMagicIndex) 
 									{
 										bMagicEye = true;
 									}
 									break;
 								}
-								else if(i!=m_cbMagicIndex && m_cbMagicIndex != MAX_INDEX && cbCardIndexTemp[i]+cbCardIndexTemp[m_cbMagicIndex]==2)
+								else if(i!=m_cbMagicIndex && m_cbMagicIndex != INVAILD_CARD_INDEX && cbCardIndexTemp[i]+cbCardIndexTemp[m_cbMagicIndex]==2)
 								{
 									cbCardEye = SwitchToCardData(i);
 									bMagicEye = true;
@@ -1660,8 +1689,10 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 						AnalyseItem.cbCardEye=cbCardEye;
 						AnalyseItem.bMagicEye = bMagicEye;
 
-						//插入结果
-						AnalyseItemArray.Add(AnalyseItem);
+						if( isPossibleHu(&AnalyseItem) ) {
+							//插入结果
+							AnalyseItemArray.Add(AnalyseItem);
+						}
 					}
 				}
 			}
@@ -1688,9 +1719,114 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 		} while (true);
 	}
 
+	if(AnalyseItemArray.GetCount()>0){
+		int i=0;
+	}
 	return (AnalyseItemArray.GetCount()>0);
 }
 
+bool CGameLogic::isPossibleHu(const tagAnalyseItem *pAnalyseItem) {
+	if( !CheckHuFormatStyle(pAnalyseItem) ) return false;
+
+	if( !CheckYaoJiuFormat(pAnalyseItem)) return false;
+
+	return true;
+}
+
+bool CGameLogic::CheckYaoJiuFormat(const tagAnalyseItem *pAnalyseItem){
+	if( isYaoJiuCard(pAnalyseItem->cbCardEye) ) return true;
+	if( isYaoJiuSubstitute(pAnalyseItem->cbCardEye) ) return true;
+
+	for( int i=0; i<MAX_WEAVE; i++){
+		if( pAnalyseItem->wWeaveKind[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT) ){
+			for( int j=0; j<3; j++){
+				if( isYaoJiuCard(pAnalyseItem->cbCardData[i][j]) ) return true;
+			}
+		} else {
+			if( isYaoJiuCard(pAnalyseItem->cbCenterCard[i]) ) return true;
+			if( isYaoJiuSubstitute(pAnalyseItem->cbCenterCard[i]) ) return true;
+		}
+	}
+
+	BYTE magicCard = SwitchToCardData(m_cbMagicIndex) ;
+
+	//⑤	当自己手中有会牌时，如果缺少幺九，可以代替幺九，但则不再可以替代其他牌。 
+	bool substituteYaoJiuFlag = false;
+	if( pAnalyseItem->bMagicEye && pAnalyseItem->cbCardEye!=magicCard) return false;
+	for( int i=0; i<MAX_WEAVE; i++){
+		if( pAnalyseItem->cbCardData[i][2]==magicCard ) {
+			if( pAnalyseItem->cbCardData[i][0]==magicCard && pAnalyseItem->cbCardData[i][1]==magicCard ){ substituteYaoJiuFlag = true; continue;}
+
+			if( (pAnalyseItem->cbCardData[i][0]&MASK_VALUE)==0x02 && (pAnalyseItem->cbCardData[i][1]&MASK_VALUE)==0x03){ substituteYaoJiuFlag = true; continue;}
+			if( (pAnalyseItem->cbCardData[i][0]&MASK_VALUE)==0x03 && (pAnalyseItem->cbCardData[i][1]&MASK_VALUE)==0x02){ substituteYaoJiuFlag = true; continue;}
+			if( (pAnalyseItem->cbCardData[i][0]&MASK_VALUE)==0x07 && (pAnalyseItem->cbCardData[i][1]&MASK_VALUE)==0x08){ substituteYaoJiuFlag = true; continue;}
+			if( (pAnalyseItem->cbCardData[i][0]&MASK_VALUE)==0x08 && (pAnalyseItem->cbCardData[i][1]&MASK_VALUE)==0x07){ substituteYaoJiuFlag = true; continue;}
+
+			return false;
+		}
+	}
+
+	return substituteYaoJiuFlag;
+}
+
+bool CGameLogic::isYaoJiuCard(BYTE card){
+	if( card == SwitchToCardData(m_cbMagicIndex) ) return false;
+
+	switch( card ){
+		case 0x31:
+		case 0x32:
+		case 0x33:
+		case 0x34:
+		case 0x35:
+		case 0x36:
+		case 0x37:
+			return true;
+	}
+
+	return false;
+}
+
+bool CGameLogic::isYaoJiuSubstitute(BYTE card){
+	if( card == SwitchToCardData(m_cbMagicIndex) ) return false;
+
+	switch( card ){
+		case 0x01:
+		case 0x11:
+		case 0x21:
+		case 0x09:
+		case 0x19:
+		case 0x29:
+			return true;
+	}
+
+	return false;
+}
+
+bool CGameLogic::CheckHuFormatStyle(const tagAnalyseItem *pAnalyseItem){
+	bool bOnlyShunzi = true;
+
+	// 111 111 111 111 11
+	// 123 111 111 111 11
+	// 123 123 111 111 11
+	// 123 123 123 111 11
+	for(int i=0; i<MAX_WEAVE; i++){
+		if( !(pAnalyseItem->wWeaveKind[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT))!=0 ){
+			bOnlyShunzi = false;
+			return true;
+		}
+	}
+
+	{ //  123 123 123 123 11 ( in this case, 11 must be Duizi (对子）of 中， 发， 白  123-Shunzi(顺子) )
+		if( bOnlyShunzi && (pAnalyseItem->cbCardEye==SwitchToCardData(m_cbMagicIndex)) )
+			return true;
+
+		if( bOnlyShunzi && (pAnalyseItem->cbCardEye>30 && pAnalyseItem->cbCardEye<34) ){ // 中， 发， 白
+			return true;
+		}
+	}
+
+	return false;
+}
 /*
 // 胡法分析函数
 */
@@ -1713,7 +1849,7 @@ bool CGameLogic::IsMaQi(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChi
 		return false;
 
 	BYTE cbGang = 0;
-	BYTE cbMagicCount = m_cbMagicIndex != MAX_INDEX ? cbCardIndex[m_cbMagicIndex] : 0;
+	BYTE cbMagicCount = m_cbMagicIndex != INVAILD_CARD_INDEX ? cbCardIndex[m_cbMagicIndex] : 0;
 	//变量定义
 	for(BYTE i=0;i<MAX_INDEX;i++)
 	{
@@ -1733,22 +1869,6 @@ bool CGameLogic::IsMaQi(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChi
 
 			cbGang+= cbCardIndex[i] / 4;
 		}
-	}
-
-	if(cbGang >= 2)//手上有两个4张，王中王
-	{
-		ChiHuRight |= CHR_MA_QI_WZW;
-		return true;
-	}
-	else if(cbGang == 1)//有一个4张，麻七王
-	{
-		ChiHuRight |= CHR_MA_QI_WANG;
-		return true;
-	}
-	else//麻七对
-	{
-		ChiHuRight |=CHR_MA_QI_DUI;
-		return true;
 	}
 
 	return false;
@@ -1778,18 +1898,37 @@ bool CGameLogic::IsShiSanLan(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount
 		}
 	}
 
-	for(int i=27;i<MAX_INDEX;i++)//检查风牌
+	//所有风牌都有, 十三烂
+	ChiHuRight |= CHR_SHI_SAN_YAO;
+	return true;
+}
+
+//鸡胡
+bool CGameLogic::IsJiaHuFormat(BYTE cbHuPai, const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount)
+{
+	for(BYTE i = nWeaveCount; i < MAX_WEAVE; i++)
 	{
-		if(cbCardIndex[i]==0)//没有包含所有风牌，十三烂
-		{
-			ChiHuRight |= CHR_SHI_SAN_LAN;
-			return true;
+		if(pAnalyseItem->wWeaveKind[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT)){
+			if( cbHuPai == pAnalyseItem->cbCardData[i][1] )
+				return true;
+
+			if( (cbHuPai&MASK_VALUE)==0x03 ){
+				if( ((pAnalyseItem->cbCardData[i][0]&MASK_VALUE)==0x01)
+					&& ((pAnalyseItem->cbCardData[i][1]&MASK_VALUE)==0x02)
+					&& (pAnalyseItem->cbCardData[i][2]==cbHuPai))
+					return true;
+			}
+
+			if( (cbHuPai&MASK_VALUE)==0x09 ){
+				if( (pAnalyseItem->cbCardData[i][0]==cbHuPai)
+					&& ((pAnalyseItem->cbCardData[i][1]&MASK_VALUE)==0x08)
+					&& ((pAnalyseItem->cbCardData[i][2]&MASK_VALUE)==0x09))
+					return true;
+			}
 		}
 	}
 
-	//所有风牌都有，七星十三烂
-	ChiHuRight |= CHR_QX_SHI_SAN_LAN;
-	return true;
+	return false;
 }
 
 //鸡胡
@@ -1820,7 +1959,7 @@ bool CGameLogic::IsPingHu(const tagAnalyseItem *pAnalyseItem)
 }
 
 //清一色
-bool CGameLogic::IsQingYiSe(const tagAnalyseItem * pAnalyseItem, bool &bQuanFan)
+bool CGameLogic::IsQingYiSe(const tagAnalyseItem * pAnalyseItem)
 {
 
 	//参数校验
@@ -1834,15 +1973,6 @@ bool CGameLogic::IsQingYiSe(const tagAnalyseItem * pAnalyseItem, bool &bQuanFan)
 		{
 			return false;
 		}
-	}
-
-	if(0x30 == cbCardColor)
-	{
-		bQuanFan = true;
-	}
-	else 
-	{
-		bQuanFan = false;
 	}
 
 	return true;

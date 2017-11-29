@@ -11,7 +11,8 @@
 #define	INDEX_REPLACE_CARD					MAX_INDEX
 
 
-#define INVAILD_CARD_INDEX          0xFF
+#define INVAILD_CARD_INDEX          MAX_INDEX
+#define INVAILD_CARD_DATA           0x00
 //////////////////////////////////////////////////////////////////////////
 //逻辑掩码
 
@@ -57,31 +58,54 @@
 #define WIK_KIND_HU					0x0040								//吃胡类型
 //#define WIK_KIND_JIN_BAO			0x0080								
 
+
+//CMD_S_GameConclude.wHuKindData 
+#define  HK_ZHUANG_JIA				0x0001			// 庄家
+#define  HK_ZI_MO					0x0002			// 自摸
+#define  HK_QING_YI_SE				0x0004			// 清一色
+#define  HK_PIAO_HU					0x0008			// 飘胡
+#define  HK_QIONG_HU				0x0010			// 穷胡
+#define  HK_SHI_SAN_YAO				0x0020			// 十三幺
+#define  HK_QI_DUI					0x0040			// 七对		// =0
+
+#define  HK_JIN_BAO					0x1000			// 进宝
+
 //////////////////////////////////////////////////////////////////////////
 //胡牌定义
 
-#define CHR_PING_HU					0x00000001							//平胡
-#define CHR_PENG_PENG				0x00000002							//碰碰胡
-#define CHR_DAN_DIAN_QI_DUI			0x00000004							//单点七对
-#define CHR_MA_QI_DUI				0x00000008							//麻七对
-#define CHR_MA_QI_WANG				0x00000010							//麻七王
-#define CHR_MA_QI_WZW				0x00000020							//麻七王中王
-#define CHR_SHI_SAN_LAN				0x00000040							//十三烂
-#define CHR_QX_SHI_SAN_LAN			0x00000080							//七星十三烂
-#define CHR_TIAN_HU					0x00000100							//天胡
-#define CHR_DI_HU					0x00000200							//地胡
-#define CHR_QI_SHOU_LISTEN			0x00000400							//起首听
-#define CHR_JIN_BAO					0x00000800							//进宝      // After this, must check Ting status
 
-#define CHR_FEN_ZHANG				0x00008000							//分张
+#define HU_KIND_MASK				0x0000FFFF
+#define CHR_PING_HU					0x00000001			//平胡
+#define CHR_ZHUANG_JIA				0x00000002			// 庄家
+#define CHR_ZI_MO					0x00000004			// 自摸
+#define CHR_QING_YI_SE				0x00000008			// 清一色
+#define CHR_PIAO_HU					0x00000010			// 飘胡     // =0
+#define CHR_QIONG_HU				0x00000020			// 穷胡     // =0
+#define CHR_SHI_SAN_YAO				0x00000040			// 十三幺
+#define CHR_QI_DUI					0x00000080			// 七对		// =0
+#define CHR_SHOU_BA_YI				0x00000100			//手把一	
+#define CHR_JIA_HU					0x00000200			//	夹胡
+#define CHR_JIN_BAO					0x00000800			// 进宝
+#define CHR_FEN_ZHANG				0x00008000			//分张	// 海底捞月（haidilaoyue）
 
+#define GANG_KIND_MASK				0xFFFF0000
+#define CHR_GANG_SHANG_HUA          0x00010000                          //杠上花
+#define CHR_GANG_SHANG_PAO          0x00020000                          //杠上炮
+#define CHR_QIANG_GANG_HU           0x00040000                          //抢杠胡
+#define CHR_CHI_HU					0x00080000							//放炮
 
+//#define CHR_PENG_PENG				0x00000002							//碰碰胡
+//#define CHR_DAN_DIAN_QI_DUI			0x00000004							//单点七对
+//#define CHR_MA_QI_DUI				0x00000008							//麻七对
+//#define CHR_MA_QI_WANG				0x00000010							//麻七王
+//#define CHR_MA_QI_WZW				0x00000020							//麻七王中王
+//#define CHR_SHI_SAN_LAN				0x00000040							//十三烂
+//#define CHR_QX_SHI_SAN_LAN			0x00000080							//七星十三烂
+//#define CHR_TIAN_HU					0x00000100							//天胡
+//#define CHR_DI_HU					0x00000200							//地胡
+//#define CHR_QI_SHOU_LISTEN			0x00000400							//起首听
+//#define CHR_JIN_BAO					0x00000800							//进宝      // After this, must check Ting status
 
-#define CHR_GANG_SHANG_HUA          0x00800000                          //杠上花
-#define CHR_GANG_SHANG_PAO          0x01000000                          //杠上炮
-#define CHR_QIANG_GANG_HU           0x02000000                          //抢杠胡
-#define CHR_CHI_HU					0x04000000							//放炮
-#define CHR_ZI_MO					0x08000000							//自摸
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -280,7 +304,9 @@ public:
 	//BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbOutCard[][28]);
 	BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE& cbOutCardCount,BYTE cbOutCardData[],BYTE cbHuCardCount[],BYTE cbHuCardData[][28]);
 	// Check Ting conditions
-	bool isPossibleTing(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);
+	bool isPossibleTing(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);	
+	//Check if Kaimen was opened or not
+	bool isOpenedKaimen(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);
 	//获取胡牌数据，听牌后调用
 	BYTE GetHuCard( const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbHuCardData[]);
 	BYTE GetRandHuiPaiCard( );
@@ -312,6 +338,14 @@ private:
 	//分析扑克
 	bool AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveICount, CAnalyseItemArray & AnalyseItemArray);
 
+	// If this Analyse Item is able to do Hu(胡) return ture. if not, return false
+	bool isPossibleHu(const tagAnalyseItem *pAnalyseItem);
+
+	bool CheckHuFormatStyle(const tagAnalyseItem *pAnalyseItem);
+	bool CheckYaoJiuFormat(const tagAnalyseItem *pAnalyseItem);
+	bool isYaoJiuCard(BYTE card);
+	bool isYaoJiuSubstitute(BYTE card);
+
 	//胡法分析
 protected:
 
@@ -322,13 +356,13 @@ protected:
 	//十三烂系列
 	bool IsShiSanLan(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChiHuRight &ChiHuRight);
 
-
+	bool IsJiaHuFormat(BYTE cbHuPai, const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount);
 	//平胡
 	bool IsPingHu(const tagAnalyseItem *pAnalyseItem);
 	//鸡胡
 	bool IsJiHu(const tagAnalyseItem *pAnalyseItem);
 	//清一色
-	bool IsQingYiSe(const tagAnalyseItem * pAnalyseItem, bool &bQuanFan);	
+	bool IsQingYiSe(const tagAnalyseItem * pAnalyseItem);	
 	//混一色
 	bool IsHunYiSe(const tagAnalyseItem * pAnalyseItem);	
 
@@ -348,6 +382,10 @@ public:
 	void SetCustomRule(tagCustomRule *pRule);
 
 	bool IsChaseArrow(BYTE cbProvidedCardIndex,const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode);
+
+#ifdef CARD_DISPATCHER_CONTROL
+	void printLogAnalyseItems(CAnalyseItemArray* arr);
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////////////////

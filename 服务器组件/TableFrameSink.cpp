@@ -24,7 +24,7 @@ CTableFrameSink::CTableFrameSink()
 	m_wBankerUser = INVALID_CHAIR;
 	m_wLianZhuang = 1;
 	m_wCurrentUser = INVALID_CHAIR;
-	m_cbMagicIndex = MAX_INDEX;
+	m_cbMagicIndex = INVAILD_CARD_INDEX;
 	m_cbBaoPaiIndex = INVAILD_CARD_INDEX;
 	ZeroMemory(m_bTing, sizeof(m_bTing));
 	ZeroMemory(m_bTrustee, sizeof(m_bTrustee));
@@ -133,7 +133,7 @@ VOID CTableFrameSink::RepositionSink()
 	//游戏变量
 	m_wSiceCount = 0;
 	m_wCurrentUser = INVALID_CHAIR;
-	m_cbMagicIndex = MAX_INDEX;
+	m_cbMagicIndex = INVAILD_CARD_INDEX;
 	m_cbBaoPaiIndex = INVAILD_CARD_INDEX;
 	m_cbMinusHeadCount = 0;
 	m_cbMinusLastCount = 0;
@@ -1892,7 +1892,7 @@ bool CTableFrameSink::OnUserTrustee(WORD wChairID, bool bTrustee)
 				}
 			}
 
-			ASSERT(cardindex != MAX_INDEX);
+			ASSERT(cardindex != INVAILD_CARD_INDEX);
 			OnUserOutCard(wChairID,m_GameLogic.SwitchToCardData(cardindex),true);
 		}
 		else if(m_wCurrentUser == INVALID_CHAIR && m_bUserActionDone==false)
@@ -2020,7 +2020,7 @@ bool CTableFrameSink::SendUpdateBaopaiNotify()
 BYTE CTableFrameSink::CreateNewBaopai()
 {
 	if( m_tGameCustomRule.bEnabled_BaoPai ){
-		BYTE magicCard = m_cbMagicIndex<MAX_INDEX ? m_GameLogic.SwitchToCardData(m_cbMagicIndex) : INVAILD_CARD_INDEX;
+		BYTE magicCard = m_cbMagicIndex<MAX_INDEX ? m_GameLogic.SwitchToCardData(m_cbMagicIndex) : INVAILD_CARD_DATA;
 		for(int i=m_cbMinusLastCount; i<CountArray(m_cbRepertoryCard); i++){
 			if( magicCard != m_cbRepertoryCard[i] ) break;            
 		}
@@ -2041,7 +2041,7 @@ BYTE CTableFrameSink::CreateNewBaopai()
 		return m_GameLogic.SwitchToCardIndex(cardData);
 
 	} else {
-		return INVAILD_CARD_INDEX;
+		return INVAILD_CARD_DATA;
 	}
 }
 
@@ -2281,7 +2281,7 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 	}
 
 	if(cbCount >0) {
-		if( !m_tGameCustomRule.bEnabled_ZhanLiHu || m_cbWeaveItemCount[wCurrentUser]>0 )
+		if( !m_tGameCustomRule.bEnabled_ZhanLiHu || m_GameLogic.isPossibleTing(m_WeaveItemArray[wCurrentUser], m_cbWeaveItemCount[wCurrentUser]) )
 			m_wUserAction[wCurrentUser] |= WIK_LISTEN; 
 
 		for(int i=0;i<MAX_COUNT;i++)
@@ -2372,7 +2372,7 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
    		if (EstimatKind == EstimatKind_GangCard)
    		{
 			//只有庄家和闲家之间才能放炮
-			if(m_cbMagicIndex == MAX_INDEX || (m_cbMagicIndex != MAX_INDEX && cbCenterCard != m_GameLogic.SwitchToCardData(m_cbMagicIndex)))
+			if(m_cbMagicIndex == INVAILD_CARD_INDEX || (m_cbMagicIndex != INVAILD_CARD_INDEX && cbCenterCard != m_GameLogic.SwitchToCardData(m_cbMagicIndex)))
 			{
 				bool bChiHu = true;
 				for(UINT j = 0; j < m_vecEnjoinChiHu[i].size(); j++)
@@ -2563,18 +2563,66 @@ void CTableFrameSink::CalGangScore()
 			break;
 		case WIK_WND_GANG:
 			{
+				for(int i=0;i<GAME_PLAYER;i++)
+				{
+					if(!m_bPlayStatus[i])
+						continue;
+					if(i != m_wCurrentUser)
+					{
+						m_lUserGangScore[i] -= 2*lcell;
+						m_lUserGangScore[m_wCurrentUser] += 2*lcell;
+					}
+				}
+				//记录暗杠次数
+				m_stRecord.cbAnGang[m_wCurrentUser]++;
 			}
 			break;
 		case WIK_ARW_GANG:
 			{
+				for(int i=0;i<GAME_PLAYER;i++)
+				{
+					if(!m_bPlayStatus[i])
+						continue;
+					if(i != m_wCurrentUser)
+					{
+						m_lUserGangScore[i] -= lcell;
+						m_lUserGangScore[m_wCurrentUser] += lcell;
+					}
+				}
+				//记录暗杠次数
+				m_stRecord.cbAnGang[m_wCurrentUser]++;
 			}
 			break;
 		case WIK_CHASE_WND_GANG:
 			{
+				for(int i=0;i<GAME_PLAYER;i++)
+				{
+					if(!m_bPlayStatus[i])
+						continue;
+					if(i != m_wCurrentUser)
+					{
+						m_lUserGangScore[i] -= 2*lcell;
+						m_lUserGangScore[m_wCurrentUser] += 2*lcell;
+					}
+				}
+				//记录暗杠次数
+				m_stRecord.cbAnGang[m_wCurrentUser]++;
 			}
 			break;
 		case WIK_CHASE_ARW_GANG:
 			{
+				for(int i=0;i<GAME_PLAYER;i++)
+				{
+					if(!m_bPlayStatus[i])
+						continue;
+					if(i != m_wCurrentUser)
+					{
+						m_lUserGangScore[i] -= lcell;
+						m_lUserGangScore[m_wCurrentUser] += lcell;
+					}
+				}
+				//记录暗杠次数
+				m_stRecord.cbAnGang[m_wCurrentUser]++;
 			}
 			break;
 	}
@@ -2587,16 +2635,25 @@ void CTableFrameSink::FiltrateRight(WORD wWinner, CChiHuRight &chr)
 	if(wWinner == m_wProvideUser)
 	{
 		chr |= CHR_ZI_MO;
+		if(m_cbGangStatus&(WIK_MING_GANG|WIK_AN_GANG|WIK_FANG_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG|WIK_WND_GANG))
+			chr |= CHR_GANG_SHANG_HUA;
+	}
+	else {
+		if(m_cbGangStatus == WIK_MING_GANG)
+			chr |= CHR_QIANG_GANG_HU;
 
 	}
-	else if(m_cbGangStatus == WIK_MING_GANG)
-	{
-		chr |= CHR_QIANG_GANG_HU;
-	}
-	else
+	/*else
 	{
 		ASSERT(false);
+	}*/
+
+	if (wWinner == m_wBankerUser)
+	{
+		//庄胡
+		chr |= CHR_ZHUANG_JIA;
 	}
+
 
 }
 
