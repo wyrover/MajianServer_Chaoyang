@@ -309,7 +309,7 @@ public:
 	bool isOpenedKaimen(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);
 	//获取胡牌数据，听牌后调用
 	BYTE GetHuCard( const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount,BYTE cbHuCardData[]);
-	BYTE GetRandHuiPaiCard( );
+	BYTE GetRandHuiPaiCardIndex( );
 
 	//转换函数
 public:
@@ -384,7 +384,7 @@ public:
 	bool IsChaseArrow(BYTE cbProvidedCardIndex,const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode);
 
 #ifdef CARD_DISPATCHER_CONTROL
-	void printLogAnalyseItems(CAnalyseItemArray* arr);
+	void printLogAnalyseItems(BYTE cbHuCard, CAnalyseItemArray* arr);
 #endif
 };
 

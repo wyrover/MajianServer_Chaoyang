@@ -11,7 +11,7 @@
 //构造函数
 CTableFrameSink::CTableFrameSink()
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	m_wPlayerCount = GAME_PLAYER;
 
 	//组件变量
@@ -217,7 +217,7 @@ VOID CTableFrameSink::RepositionSink()
 //配置桌子
 bool CTableFrameSink::Initialization(IUnknownEx * pIUnknownEx)
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//查询接口
 	m_pITableFrame=QUERY_OBJECT_PTR_INTERFACE(pIUnknownEx,ITableFrame);
 
@@ -315,11 +315,11 @@ bool CTableFrameSink::OnEventGameStart()
 #endif
 
 	//会牌可以当财神
-	m_cbMagicIndex = m_tGameCustomRule.bEnabled_HuiPai ? m_GameLogic.GetRandHuiPaiCard() : INVAILD_CARD_INDEX; //m_GameLogic.SwitchToCardIndex(0x35);
+	m_cbMagicIndex = m_tGameCustomRule.bEnabled_HuiPai ? m_GameLogic.GetRandHuiPaiCardIndex() : INVAILD_CARD_INDEX; //m_GameLogic.SwitchToCardIndex(0x35);
 
-#ifdef  CARD_DISPATCHER_CONTROL
-	m_cbMagicIndex = m_GameLogic.SwitchToCardIndex(0x07);  // for the TEST, Huipai set 7 wan always
-#endif
+//#ifdef  CARD_DISPATCHER_CONTROL
+//	m_cbMagicIndex = m_GameLogic.SwitchToCardIndex(0x07);  // for the TEST, Huipai set 7 wan always
+//#endif
  	m_GameLogic.SetMagicIndex(m_cbMagicIndex);
 
 	{ // BaoPai Generate
@@ -1977,16 +1977,17 @@ bool CTableFrameSink::SendOperateNotify()
 	//发送提示
 	for (WORD i=0;i<m_cbPlayerCount;i++)
 	{
-		if (m_wUserAction[i]!=WIK_NULL)
+		WORD userIndex = (i+m_wProvideUser+1)%GAME_PLAYER;
+		if (m_wUserAction[userIndex]!=WIK_NULL)
 		{
 			//构造数据
 			CMD_S_OperateNotify OperateNotify;
 			OperateNotify.cbActionCard=m_cbProvideCard;
-			OperateNotify.wActionMask=m_wUserAction[i];
+			OperateNotify.wActionMask=m_wUserAction[userIndex];
 
 			//发送数据
-			m_pITableFrame->SendTableData(i,SUB_S_OPERATE_NOTIFY,&OperateNotify,sizeof(OperateNotify));
-			m_pITableFrame->SendLookonData(i,SUB_S_OPERATE_NOTIFY,&OperateNotify,sizeof(OperateNotify));
+			m_pITableFrame->SendTableData(userIndex,SUB_S_OPERATE_NOTIFY,&OperateNotify,sizeof(OperateNotify));
+			m_pITableFrame->SendLookonData(userIndex,SUB_S_OPERATE_NOTIFY,&OperateNotify,sizeof(OperateNotify));
 			
 // 			if(m_bTrustee[i])
 // 			{
@@ -2338,6 +2339,16 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 		//出牌类型
 		if (EstimatKind == EstimatKind_OutCard )
 		{
+			if( m_bTing[i]){
+				CChiHuRight chr;
+				BYTE cbWeaveCount = m_cbWeaveItemCount[i];
+				BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
+				m_wUserAction[i] = cbAction;
+
+				if (m_wUserAction[i] != WIK_NULL) 
+					bAroseAction = true;
+				continue;
+			}
 			//吃碰判断
 			if(!m_bEnjoinChiPeng[i])
 			{

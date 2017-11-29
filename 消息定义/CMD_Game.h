@@ -170,8 +170,8 @@ struct CMD_S_StatusPlay
 #define SUB_S_REPLACE_CARD			107									//用户补牌
 #define SUB_S_GAME_CONCLUDE			108									//游戏结束
 #define SUB_S_SET_BASESCORE			109									//设置基数
-#define SUB_S_HU_CARD						110									//听牌胡牌数据
-#define SUB_S_RECORD							111									//游戏记录
+#define SUB_S_HU_CARD				110									//听牌胡牌数据
+#define SUB_S_RECORD				111									//游戏记录
 //发送扑克
 struct CMD_S_GameStart
 {
@@ -287,7 +287,6 @@ struct CMD_S_GameConclude
 	BYTE							cbMaCount[GAME_PLAYER];							//码数			//no need
 	BYTE							cbMaData[7];							//码数据
 
-	WORD							wHuKindData;	                   //Victory classifiation
 	BYTE							cbBaopaiCardData;	                   // Bao Pai Card
 };
 

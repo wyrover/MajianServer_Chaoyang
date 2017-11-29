@@ -10,24 +10,26 @@ DWORD		CChiHuRight::m_dwRightMask[MAX_RIGHT_COUNT];
 
 #ifdef CARD_DISPATCHER_CONTROL
 
-void CGameLogic::printLogAnalyseItems(CAnalyseItemArray* arr){
+void CGameLogic::printLogAnalyseItems(BYTE cbHuCard, CAnalyseItemArray* arr){
 	CStringA strLog;
 	CStringA temp;
-	CStringA strFormat="\n\t\t";
+	CStringA strFormat="\n\t\t------printLogAnalyseItems----";
 
 	for(int i=0; i<arr->GetCount(); i++){
+		temp.Format("\n\t\t%02x", cbHuCard);
+		strFormat += temp;
 		for( int j=0; j<MAX_WEAVE; j++){
 			BYTE *cardData = arr->GetAt(i).cbCardData[j];
 			WORD kind = arr->GetAt(i).wWeaveKind[j];
 			if( kind==WIK_GANG || kind==WIK_WIND){
-				temp.Format("{%d, %d, %d, %d}", cardData[0], cardData[1], cardData[2], cardData[3]);
+				temp.Format("{%02x, %02x, %02x, %02x}", cardData[0], cardData[1], cardData[2], cardData[3]);
 			} else {
-				temp.Format("{%d, %d, %d}", cardData[0], cardData[1], cardData[2]);
+				temp.Format("{%02x, %02x, %02x}", cardData[0], cardData[1], cardData[2]);
 			}
 			strFormat += "-"+temp;
 		}
 		BYTE bEndCard = arr->GetAt(i).bMagicEye ? SwitchToCardData(m_cbMagicIndex) : arr->GetAt(i).cbCardEye;
-		temp.Format("{%d, %d}", arr->GetAt(i).cbCardEye, bEndCard);
+		temp.Format("{%02x, %02x}", arr->GetAt(i).cbCardEye, bEndCard);
 		strFormat += "-"+temp;
 	}
 	OutputDebugStringA(strFormat);
@@ -887,7 +889,9 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX],
 
 #ifdef CARD_DISPATCHER_CONTROL
 		if( AnalyseItemArray.GetCount()>1 ){	// for the TEST
-			printLogAnalyseItems(&AnalyseItemArray);
+			printLogAnalyseItems(cbCurrentCard, &AnalyseItemArray);
+		} else {
+			printLogAnalyseItems(cbCurrentCard, &AnalyseItemArray);
 		}
 #endif // CARD_DISPATCHER_CONTROL
 
@@ -1067,7 +1071,7 @@ BYTE CGameLogic::GetHuCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem
 	return 0;
 }
 
-BYTE CGameLogic::GetRandHuiPaiCard( )
+BYTE CGameLogic::GetRandHuiPaiCardIndex( )
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	BYTE indexHuiPai = rand()%CountArray(m_cbCardDataArray); 
@@ -1176,7 +1180,7 @@ BYTE CGameLogic::GetCardCount(const BYTE cbCardIndex[MAX_INDEX])
 //获取组合
 BYTE CGameLogic::GetWeaveCard(WORD wWeaveKind, BYTE cbCenterCard, BYTE cbCardBuffer[4])
 {
-	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//组合扑克
 	switch (wWeaveKind)
 	{
