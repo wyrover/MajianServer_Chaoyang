@@ -324,8 +324,9 @@ bool CTableFrameSink::OnEventGameStart()
 
 	{ // BaoPai Generate
 		m_cbBaoPaiIndex = CreateNewBaopai();
-		CStringA str; str.Format("\n\t\t First Baopai index: %d", m_cbBaoPaiIndex);
-		OutputDebugStringA(str);
+		CString str; str.Format(_T("\n\t\t First Baopai index: %d(0x%02x)"), m_cbBaoPaiIndex, m_GameLogic.SwitchToCardData(m_cbBaoPaiIndex));
+		OutputDebugString(str);
+		CTraceService::TraceString((LPCTSTR)str,TraceLevel_Debug);
 	}
 
 	//·Ö·¢ÆË¿Ë
@@ -2050,8 +2051,9 @@ bool CTableFrameSink::UpdateBaoPaiIfNeed(){
 	if( m_tGameCustomRule.bEnabled_BaoPai && !CheckBaopaiExist() ){
 
 		m_cbBaoPaiIndex = CreateNewBaopai();
-		CStringA str; str.Format("\n\t\t Updated Baopai index: %d", m_cbBaoPaiIndex);
-		OutputDebugStringA(str);
+		CString str; str.Format(_T("\n\t\t Updated Baopai index: %d(0x%02x)"), m_cbBaoPaiIndex, m_GameLogic.SwitchToCardData(m_cbBaoPaiIndex));
+		OutputDebugString(str);
+		CTraceService::TraceString((LPCTSTR)str,TraceLevel_Debug);
 		SendUpdateBaopaiNotify();
 		return true;
 	}

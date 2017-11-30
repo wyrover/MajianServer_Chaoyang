@@ -49,15 +49,15 @@
 
 #ifndef _DEBUG
 #ifndef _UNICODE
-	#pragma comment (lib,"../../../开发库/Lib/Ansi/KernelEngine.lib")
+#pragma comment (lib,"../../../开发库/Lib/Ansi/KernelEngine.lib")
 #else
-	#pragma comment (lib,"../../../开发库/Lib/Unicode/KernelEngine.lib")
+#pragma comment (lib,"../../../开发库/Lib/Unicode/KernelEngine.lib")
 #endif
 #else
 #ifndef _UNICODE
-	#pragma comment (lib,"../../../开发库/Lib/Ansi/KernelEngineD.lib")
+#pragma comment (lib,"../../../开发库/Lib/Ansi/KernelEngineD.lib")
 #else
-	#pragma comment (lib,"../../../开发库/Lib/Unicode/KernelEngineD.lib")
+#pragma comment (lib,"../../../开发库/Lib/Unicode/KernelEngineD.lib")
 #endif
 #endif
 
@@ -69,19 +69,19 @@
 //系统环境
 
 //平台环境
-#include "..\..\..\开发库\Include\GameServiceHead.h"
+#include "..\..\..\..\系统模块\服务器组件\游戏服务\GameServiceHead.h"
 
 #ifndef _DEBUG
 #ifndef _UNICODE
-	#pragma comment (lib,"../../../开发库/Lib/Ansi/KernelEngine.lib")
+#pragma comment (lib,"../../../../系统模块/链接库/Ansi/KernelEngine.lib")
 #else
-	#pragma comment (lib,"../../../开发库/Lib/Unicode/KernelEngine.lib")
+#pragma comment (lib,"../../../../系统模块/链接库/Unicode/KernelEngine.lib")
 #endif
 #else
 #ifndef _UNICODE
-	#pragma comment (lib,"../../../开发库/Lib/Ansi/KernelEngineD.lib")
+#pragma comment (lib,"../../../../系统模块/链接库/Ansi/KernelEngineD.lib")
 #else
-	#pragma comment (lib,"../../../开发库/Lib/Unicode/KernelEngineD.lib")
+#pragma comment (lib,"../../../../系统模块/链接库/Unicode/KernelEngineD.lib")
 #endif
 #endif
 
