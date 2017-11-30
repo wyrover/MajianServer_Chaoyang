@@ -66,7 +66,7 @@ protected:
 	WORD						m_wCurrentUser;									//当前用户
 	WORD						m_wProvideUser;									//供应用户
 	BYTE							m_cbProvideCard;								//供应扑克
-	WORD						m_wLastCatchCardUser;						//最后一个摸牌的用户
+	//WORD						m_wLastCatchCardUser;						//最后一个摸牌的用户
 	bool							m_bUserActionDone;
 	//状态变量
 protected:
@@ -126,7 +126,7 @@ protected:
 	BYTE							m_cbCardIndex[GAME_PLAYER][MAX_INDEX];			//用户扑克
 	BYTE							m_cbHandCardCount[GAME_PLAYER];					//扑克数目
 
-	BYTE							m_nChaseArrowCount;
+	BYTE							m_nChaseArrowCount[GAME_PLAYER];
 	BYTE							m_cbChaseArrowArray[GAME_PLAYER][MAX_CHASE_COUNT];		//长毛杠数目
 	//组合扑克
 protected:
@@ -266,17 +266,19 @@ protected:
 	//响应判断
 	bool EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, enEstimatKind EstimatKind);
 	//算胡牌分
-	void CalHuPaiScore(LONGLONG lEndScore[GAME_PLAYER]);
+	void CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYER]);
 	//算杠分
 	void CalGangScore();
 	//权位过滤
 	void FiltrateRight(WORD wWinner, CChiHuRight &chr);
 	//计算倍数
-	BYTE GetTimes(WORD wChairId);
+	DWORD GetTimes(WORD wChairId);
 
 	BYTE GetRemainingCount(WORD wChairID,BYTE cbCardData);
 
 	bool OnEventFenZhang();
+
+	bool processQiangGangHu(BYTE cbGangStatus, WORD wUser, WORD wProvider);
 };
 
 #endif

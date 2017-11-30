@@ -58,6 +58,9 @@ struct CMD_S_RECORD
 	BYTE cbMaCount[GAME_PLAYER];//中码个数			//no need
 	BYTE cbAnGang[GAME_PLAYER];//暗杠次数
 	BYTE cbMingGang[GAME_PLAYER];//明杠次数
+	BYTE cbDianPaoCount[GAME_PLAYER];  //点炮次数		//added for Chaoyang
+	BYTE cbZiMoCount[GAME_PLAYER];     //自摸次数		//added for Chaoyang
+	BYTE cbZhuangJiaCount[GAME_PLAYER];//庄家次数		//added for Chaoyang
 	SCORE lAllScore[GAME_PLAYER];	//总结算分
 	SCORE lDetailScore[GAME_PLAYER][32];	//单局结算分
 };
@@ -276,16 +279,11 @@ struct CMD_S_GameConclude
 	BYTE							cbProvideCard;						//供应扑克
 	BYTE							cbSendCardData;						//最后发牌
 	DWORD							dwChiHuKind[GAME_PLAYER];			//胡牌类型
-	DWORD							dwChiHuRight[GAME_PLAYER][MAX_RIGHT_COUNT];		//胡牌类型	
-	WORD							wLeftUser;							//玩家逃跑
-	WORD							wLianZhuang;					//连庄
+	DWORD							dwChiHuRight[GAME_PLAYER][MAX_RIGHT_COUNT];		//胡牌类型
 	
 	//游戏信息
 	BYTE							cbCardCount[GAME_PLAYER];			//扑克数目
 	BYTE							cbHandCardData[GAME_PLAYER][MAX_COUNT];//扑克列表
-
-	BYTE							cbMaCount[GAME_PLAYER];							//码数			//no need
-	BYTE							cbMaData[7];							//码数据
 
 	BYTE							cbBaopaiCardData;	                   // Bao Pai Card
 };

@@ -696,7 +696,7 @@ BYTE CGameLogic::EstimateEatCard(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCurre
 	for (BYTE i=0;i<CountArray(cbItemKind);i++)
 	{
 		BYTE cbValueIndex=cbCurrentIndex%9;
-		if ((cbValueIndex>=cbExcursion[i])&&((cbValueIndex-cbExcursion[i])<=6))
+		if ((cbValueIndex>=cbExcursion[i])&&(cbValueIndex<(7+cbExcursion[i])))
 		{
 			//³ÔÅÆÅÐ¶Ï
 			cbFirstIndex=cbCurrentIndex-cbExcursion[i];

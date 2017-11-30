@@ -52,28 +52,14 @@
 #define WIK_UPDATE_BAO				0x8000							// UPDATED BAO PAI
 
 
-// Hu Kind
-
+// Hu Kind : CMD_S_GameConclude.dwChiHuKind[], CTableFrameSinkf.m_dwChiHuKind[]
 #define WIK_NORMAL  				0x0000								//没有类型
 #define WIK_KIND_HU					0x0040								//吃胡类型
-//#define WIK_KIND_JIN_BAO			0x0080								
-
-
-//CMD_S_GameConclude.wHuKindData 
-#define  HK_ZHUANG_JIA				0x0001			// 庄家
-#define  HK_ZI_MO					0x0002			// 自摸
-#define  HK_QING_YI_SE				0x0004			// 清一色
-#define  HK_PIAO_HU					0x0008			// 飘胡
-#define  HK_QIONG_HU				0x0010			// 穷胡
-#define  HK_SHI_SAN_YAO				0x0020			// 十三幺
-#define  HK_QI_DUI					0x0040			// 七对		// =0
-
-#define  HK_JIN_BAO					0x1000			// 进宝
 
 //////////////////////////////////////////////////////////////////////////
 //胡牌定义
 
-
+//CTableFrameSinkf.m_ChiHuRight[]
 #define HU_KIND_MASK				0x0000FFFF
 #define CHR_PING_HU					0x00000001			//平胡
 #define CHR_ZHUANG_JIA				0x00000002			// 庄家
@@ -89,10 +75,11 @@
 #define CHR_FEN_ZHANG				0x00008000			//分张	// 海底捞月（haidilaoyue）
 
 #define GANG_KIND_MASK				0xFFFF0000
-#define CHR_GANG_SHANG_HUA          0x00010000                          //杠上花
-#define CHR_GANG_SHANG_PAO          0x00020000                          //杠上炮
-#define CHR_QIANG_GANG_HU           0x00040000                          //抢杠胡
-#define CHR_CHI_HU					0x00080000							//放炮
+#define CHR_GANG_SHANG_HUA          0x00010000          //杠上花
+#define CHR_GANG_SHANG_PAO          0x00020000          //杠上炮
+#define CHR_QIANG_GANG_HU           0x00040000          //抢杠胡
+#define CHR_QI_YU					0x00080000			//其余三家闭门
+#define CHR_CHI_HU					0x00100000			//放炮
 
 //#define CHR_PENG_PENG				0x00000002							//碰碰胡
 //#define CHR_DAN_DIAN_QI_DUI			0x00000004							//单点七对
