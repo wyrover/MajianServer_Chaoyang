@@ -2025,6 +2025,10 @@ bool CGameLogic::IsSpGangOK(const BYTE cbCardIndex[MAX_INDEX], DWORD dwOpCode)
 			nWindCondition = 0;
 			for (int i=0; i<4; i++)
 			{
+				if(SwitchToCardIndex(cbWindArray[i]) == m_cbMagicIndex) {
+					nWindCondition--;
+					break;
+				}
 				if (cbCardIndex[SwitchToCardIndex(cbWindArray[i])]<1)
 				{
 					nWindCondition--;
@@ -2040,6 +2044,10 @@ bool CGameLogic::IsSpGangOK(const BYTE cbCardIndex[MAX_INDEX], DWORD dwOpCode)
 			nArrowCondition = 0;
 			for (int i=0; i<3; i++)
 			{
+				if(SwitchToCardIndex(cbArrowArray[i]) == m_cbMagicIndex) {
+					nArrowCondition--;
+					break;
+				}
 				if (cbCardIndex[SwitchToCardIndex(cbArrowArray[i])]<1)
 				{
 					nArrowCondition--;
