@@ -248,6 +248,65 @@ copy /y ..\..\..\..\ÔËÐÐ\Release\Unicode\$(TargetFileName) ..\..\..\·¢²¼×é¼þ\·þÎ
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
+		<Configuration
+			Name="Test_Unicode|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			UseOfMFC="2"
+			CharacterSet="1">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_AFXEXT;_UNICODE;LSH_TEST;CARD_DISPATCHER_CONTROL"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				TreatWChar_tAsBuiltInType="TRUE"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="../../../../ÔËÐÐ/Debug/Unicode/SparrowCHYServer.dll"
+				LinkIncremental="2"
+				ModuleDefinitionFile=".\GameServer.def"
+				GenerateDebugInformation="TRUE"
+				SubSystem="2"
+				ImportLibrary="$(OutDir)/GameServer.lib"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="FALSE"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="mkdir ..\..\..\·¢²¼×é¼þ\·þÎñÆ÷×é¼þ\Debug\Unicode
+copy /y ..\..\..\..\ÔËÐÐ\Debug\Unicode\$(TargetFileName) ..\..\..\·¢²¼×é¼þ\·þÎñÆ÷×é¼þ\Debug\Unicode\$(TargetFileName)
+"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="2052"
+				AdditionalIncludeDirectories="$(IntDir)"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -293,6 +352,12 @@ copy /y ..\..\..\..\ÔËÐÐ\Release\Unicode\$(TargetFileName) ..\..\..\·¢²¼×é¼þ\·þÎ
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release_Unicode|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Test_Unicode|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>

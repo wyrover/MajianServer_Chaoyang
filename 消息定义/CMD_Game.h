@@ -7,8 +7,9 @@
 
 //ÅäÅÆÆ÷¿ª¹Ø
 #ifdef _DEBUG
-#define CARD_DISPATCHER_CONTROL
-#define LSH_TEST
+// This definitions are define in Test_Unicode Configration.
+//#define CARD_DISPATCHER_CONTROL
+//#define LSH_TEST
 #endif
 
 //////////////////////////////////////////////////////////////////////////

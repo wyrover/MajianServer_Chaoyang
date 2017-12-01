@@ -9,6 +9,7 @@ Global
 		Debug_Unicode = Debug_Unicode
 		Release = Release
 		Release_Unicode = Release_Unicode
+		Test_Unicode = Test_Unicode
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{390B89DC-4355-442B-AD09-91F6D9AF32DD}.Debug.ActiveCfg = Debug|Win32
@@ -19,6 +20,8 @@ Global
 		{390B89DC-4355-442B-AD09-91F6D9AF32DD}.Release.Build.0 = Release|Win32
 		{390B89DC-4355-442B-AD09-91F6D9AF32DD}.Release_Unicode.ActiveCfg = Release_Unicode|Win32
 		{390B89DC-4355-442B-AD09-91F6D9AF32DD}.Release_Unicode.Build.0 = Release_Unicode|Win32
+		{390B89DC-4355-442B-AD09-91F6D9AF32DD}.Test_Unicode.ActiveCfg = Test_Unicode|Win32
+		{390B89DC-4355-442B-AD09-91F6D9AF32DD}.Test_Unicode.Build.0 = Test_Unicode|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

@@ -3,6 +3,8 @@
 /__*
 Debug*/
 Release*/
+Test_*/
+GameRule/
 
 *.sdf
 
