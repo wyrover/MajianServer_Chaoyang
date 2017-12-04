@@ -251,7 +251,7 @@ protected:
 	//·¢ËÍ²Ù×÷
 	bool SendOperateNotify();
 
-	BYTE CreateNewBaopai();
+	BYTE CreateNewBaopaiIndex();
 
 	bool UpdateBaoPaiIfNeed();
 
