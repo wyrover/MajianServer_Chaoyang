@@ -1042,7 +1042,7 @@ bool CGameLogic::isPossibleTing(const BYTE cbCardIndex[MAX_INDEX], const tagWeav
 
 	bool isContainYaoJiu = false;
 	for( int i=0; i<MAX_INDEX; i++){
-		if( cbCardIndex[i]>0 && isYaoJiuCard(SwitchToCardData(cbCardIndex[i]))){
+		if( cbCardIndex[i]>0 && isYaoJiuCard(SwitchToCardData(i))){
 			isContainYaoJiu = true;
 			break;
 		}
