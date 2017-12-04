@@ -2540,15 +2540,19 @@ void CTableFrameSink::CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYE
 		{
 			if(!m_bPlayStatus[i])
 				continue;
-			if(i != wWinnder)
+			if( i != wWinnder)
 			{
+				SCORE lScoreItem = cbTimes*lCellScore;
+				if( m_wBankerUser != wWinnder && i == m_wBankerUser)
+					lScoreItem *= 2;
+
 				if(m_tGameCustomRule.bEnabled_DianPao && !(dwHuRight[0]&CHR_ZI_MO) ){
 					ASSERT((m_wProvideUser!=INVALID_CHAIR) && (m_wProvideUser!=wWinnder) );
-					lEndScore[m_wProvideUser] -= cbTimes*lCellScore;
+					lEndScore[m_wProvideUser] -= lScoreItem;
 				} else {
-					lEndScore[i] -= cbTimes*lCellScore;
+					lEndScore[i] -= lScoreItem;
 				}
-				lEndScore[wWinnder] += cbTimes*lCellScore;
+				lEndScore[wWinnder] += lScoreItem;
 			}
 		}
 
