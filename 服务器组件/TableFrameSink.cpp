@@ -1223,37 +1223,21 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 			CopyMemory(m_cbOperateCard[wTargetUser], cbOperateCard, sizeof(m_cbOperateCard[wTargetUser]));
 		}
 
-		for (WORD i = 0; i < m_cbPlayerCount; i++)
-		{
-			WORD userIndex = (i+m_wProvideUser+1)%GAME_PLAYER;
-			WORD wUserAction = (!m_bResponse[userIndex]) ? m_wUserAction[userIndex] : m_wPerformAction[userIndex];
-
-			BYTE cbUserActionRank = m_GameLogic.GetUserActionRank(wUserAction);
-			BYTE cbTargetActionRank = m_GameLogic.GetUserActionRank(wTargetAction);
-
-			if (cbUserActionRank > cbTargetActionRank) {
-				wTargetUser = userIndex;
-				wTargetAction = wUserAction;
-			}
-		}
-		if( !m_bResponse[wTargetUser] ){
+		if (wTargetAction == WIK_NULL){
+			//放弃操作
 			if( SendOperateNotifyWithRank() ) {
 				return true;
 			}
-			else  ASSERT(false);
-		}
+			else {
+				//用户状态
+				ZeroMemory(m_bResponse, sizeof(m_bResponse));
+				ZeroMemory(m_wUserAction, sizeof(m_wUserAction));
+				ZeroMemory(m_cbOperateCard, sizeof(m_cbOperateCard));
+				ZeroMemory(m_wPerformAction, sizeof(m_wPerformAction));
 
-		if (wTargetAction == WIK_NULL){
-			//放弃操作
-
-			//用户状态
-			ZeroMemory(m_bResponse, sizeof(m_bResponse));
-			ZeroMemory(m_wUserAction, sizeof(m_wUserAction));
-			ZeroMemory(m_cbOperateCard, sizeof(m_cbOperateCard));
-			ZeroMemory(m_wPerformAction, sizeof(m_wPerformAction));
-
-			DispatchCardData(m_wResumeUser,m_cbGangStatus != WIK_GANERAL);
-			return true;
+				DispatchCardData(m_wResumeUser,m_cbGangStatus != WIK_GANERAL);
+				return true;
+			}
 		}
  
  		//变量定义
