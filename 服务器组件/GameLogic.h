@@ -24,8 +24,8 @@
 
 //动作类型
 #define WIK_GANERAL					0x00								//普通操作
-#define WIK_MING_GANG				0x01								//明杠（碰后再杠）  - Means PuGang in Chaoyang
-#define WIK_FANG_GANG				0x02								//放杠				- Means MingGang in Chaoyang
+#define WIK_BU_GANG 				0x01								//明杠（碰后再杠）  - Means BuGang in Chaoyang
+#define WIK_MING_GANG				0x02								//放杠				- Means MingGang in Chaoyang
 #define WIK_AN_GANG					0x03								//暗杠
 
 #define WIK_WND_GANG				0x04								//【东南西北】四张【风牌】在一起组成的杠
@@ -291,7 +291,7 @@ public:
 	//BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE cbOutCard[][28]);
 	BYTE AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, BYTE& cbOutCardCount,BYTE cbOutCardData[],BYTE cbHuCardCount[],BYTE cbHuCardData[][28]);
 	// Check Ting conditions
-	bool isPossibleTing(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);	
+	bool isPossibleTing(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);	
 	//Check if Kaimen was opened or not
 	bool isOpenedKaimen(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount);
 	//获取胡牌数据，听牌后调用
@@ -326,7 +326,7 @@ private:
 	bool AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveICount, CAnalyseItemArray & AnalyseItemArray);
 
 	// If this Analyse Item is able to do Hu(胡) return ture. if not, return false
-	bool isPossibleHu(const tagAnalyseItem *pAnalyseItem);
+	bool isPossibleHu(const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount);
 
 	bool CheckHuFormatStyle(const tagAnalyseItem *pAnalyseItem);
 	bool CheckYaoJiuFormat(const tagAnalyseItem *pAnalyseItem);

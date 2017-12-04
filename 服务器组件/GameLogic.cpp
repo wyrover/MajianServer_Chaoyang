@@ -943,8 +943,10 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 			for(BYTE j = 0; j < MAX_INDEX-MAX_HUA_INDEX; j++)
 			{
 				BYTE cbTestCard = SwitchToCardData(j);
-				if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp, WeaveItem, cbWeaveCount, cbTestCard, chr))
+				if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp, WeaveItem, cbWeaveCount, cbTestCard, chr)){
+					if( !isPossibleTing(cbCardIndexTemp, WeaveItem, cbWeaveCount) ) continue;
 					return WIK_LISTEN;
+				}
 			}
 
 			cbCardIndexTemp[i]++;
@@ -955,8 +957,10 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 		for(BYTE j = 0; j < MAX_INDEX-MAX_HUA_INDEX; j++)
 		{
 			BYTE cbCurrentCard = SwitchToCardData(j);
-			if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbCurrentCard,chr))
+			if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbCurrentCard,chr)){
+				if( !isPossibleTing(cbCardIndexTemp, WeaveItem, cbWeaveCount) ) continue;
 				return WIK_LISTEN;
+			}
 		}
 	}
 
@@ -990,6 +994,7 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 				BYTE cbTestCard = SwitchToCardData(j);
 				if(WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbTestCard,chr))
 				{
+					if( !isPossibleTing(cbCardIndexTemp, WeaveItem, cbWeaveCount) ) continue;
 					if(bAdd==FALSE)
 					{
 						bAdd=true;
@@ -1012,6 +1017,7 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 			BYTE cbTestCard = SwitchToCardData(j);
 			if( WIK_CHI_HU == AnalyseChiHuCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,cbTestCard,chr) )
 			{
+				if( !isPossibleTing(cbCardIndexTemp, WeaveItem, cbWeaveCount) ) continue;
 				cbHuCardData[0][nCount++] = cbTestCard;
 			}
 		}
@@ -1024,16 +1030,42 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 }
 
 // Check Ting condition
-bool CGameLogic::isPossibleTing(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount){
+bool CGameLogic::isPossibleTing(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount){
+	
+	bool isContainChiPeng = false;
 	for(int i=0; i<cbWeaveCount; i++){
-		if( WeaveItem[i].wWeaveKind&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) )
-			return true;
+		if( WeaveItem[i].wWeaveKind&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) ){
+			isContainChiPeng = true;
+			break;
+		}
 	}
-	return false;
+
+	bool isContainYaoJiu = false;
+	for( int i=0; i<MAX_INDEX; i++){
+		if( cbCardIndex[i]>0 && isYaoJiuCard(SwitchToCardData(cbCardIndex[i]))){
+			isContainYaoJiu = true;
+			break;
+		}
+	}
+
+	if( !isContainYaoJiu ) {
+		for(int i=0; i<cbWeaveCount; i++){
+			if( WeaveItem[i].wWeaveKind&(WIK_LEFT|WIK_CENTER|WIK_RIGHT) ){
+				for( int j=0; j<3; j++){
+					if( isYaoJiuCard(WeaveItem[i].cbCardData[j]) ) { isContainYaoJiu = true; break;}
+				}
+			} else {
+				if( isYaoJiuCard(WeaveItem[i].cbCenterCard) ) { isContainYaoJiu = true; break;}
+			}
+		}
+	}
+
+	return (isContainChiPeng && isContainYaoJiu);
 }
 
 // Check Kaimen condition 开门
 bool CGameLogic::isOpenedKaimen(const tagWeaveItem WeaveItem[], BYTE cbWeaveCount){
+	//Peng, Chi, Gang(except FengGang & AnGang)
 	for(int i=0; i<cbWeaveCount; i++){
 		if( WeaveItem[i].wWeaveKind&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) )
 			return true;
@@ -1430,7 +1462,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 				else AnalyseItem.bMagicEye = false;
 				AnalyseItem.cbCardEye=cbCardIndex[i]==0?SwitchToCardData(cbCardIndex[m_cbMagicIndex]):SwitchToCardData(i);
 
-				if( isPossibleHu(&AnalyseItem) ) {
+				if( isPossibleHu(&AnalyseItem, cbWeaveCount) ) {
 					//插入结果
 					AnalyseItemArray.Add(AnalyseItem);
 
@@ -1676,7 +1708,8 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 						{
 							AnalyseItem.wWeaveKind[i]=WeaveItem[i].wWeaveKind;
 							AnalyseItem.cbCenterCard[i]=WeaveItem[i].cbCenterCard;
-							GetWeaveCard(WeaveItem[i].wWeaveKind,WeaveItem[i].cbCenterCard,AnalyseItem.cbCardData[i]);
+							CopyMemory(AnalyseItem.cbCardData[i],WeaveItem[i].cbCardData,sizeof(WeaveItem[i].cbCardData));
+							//GetWeaveCard(WeaveItem[i].wWeaveKind,WeaveItem[i].cbCenterCard,AnalyseItem.cbCardData[i]);
 						}
 
 						//设置牌型
@@ -1693,7 +1726,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 						AnalyseItem.cbCardEye=cbCardEye;
 						AnalyseItem.bMagicEye = bMagicEye;
 
-						if( isPossibleHu(&AnalyseItem) ) {
+						if( isPossibleHu(&AnalyseItem, cbWeaveCount) ) {
 							//插入结果
 							AnalyseItemArray.Add(AnalyseItem);
 						}
@@ -1729,7 +1762,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 	return (AnalyseItemArray.GetCount()>0);
 }
 
-bool CGameLogic::isPossibleHu(const tagAnalyseItem *pAnalyseItem) {
+bool CGameLogic::isPossibleHu(const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount) {
 	if( !CheckHuFormatStyle(pAnalyseItem) ) return false;
 
 	if( !CheckYaoJiuFormat(pAnalyseItem)) return false;
@@ -1752,11 +1785,12 @@ bool CGameLogic::CheckYaoJiuFormat(const tagAnalyseItem *pAnalyseItem){
 		}
 	}
 
-	BYTE magicCard = SwitchToCardData(m_cbMagicIndex) ;
+	BYTE magicCard = SwitchToCardData(m_cbMagicIndex);
 
 	//⑤	当自己手中有会牌时，如果缺少幺九，可以代替幺九，但则不再可以替代其他牌。 
 	bool substituteYaoJiuFlag = false;
 	if( pAnalyseItem->bMagicEye && pAnalyseItem->cbCardEye!=magicCard) return false;
+	if( pAnalyseItem->bMagicEye && pAnalyseItem->cbCardEye==magicCard) substituteYaoJiuFlag = true;
 	for( int i=0; i<MAX_WEAVE; i++){
 		if( pAnalyseItem->cbCardData[i][2]==magicCard ) {
 			if( pAnalyseItem->cbCardData[i][0]==magicCard && pAnalyseItem->cbCardData[i][1]==magicCard ){ substituteYaoJiuFlag = true; continue;}
@@ -1774,16 +1808,15 @@ bool CGameLogic::CheckYaoJiuFormat(const tagAnalyseItem *pAnalyseItem){
 }
 
 bool CGameLogic::isYaoJiuCard(BYTE card){
-	if( card == SwitchToCardData(m_cbMagicIndex) ) return false;
+	//if( card == SwitchToCardData(m_cbMagicIndex) ) return false;
 
 	switch( card ){
-		case 0x31:
-		case 0x32:
-		case 0x33:
-		case 0x34:
-		case 0x35:
-		case 0x36:
-		case 0x37:
+		case 0x01:
+		case 0x11:
+		case 0x21:
+		case 0x09:
+		case 0x19:
+		case 0x29:
 			return true;
 	}
 
@@ -1794,12 +1827,13 @@ bool CGameLogic::isYaoJiuSubstitute(BYTE card){
 	if( card == SwitchToCardData(m_cbMagicIndex) ) return false;
 
 	switch( card ){
-		case 0x01:
-		case 0x11:
-		case 0x21:
-		case 0x09:
-		case 0x19:
-		case 0x29:
+		case 0x31:
+		case 0x32:
+		case 0x33:
+		case 0x34:
+		case 0x35:
+		case 0x36:
+		case 0x37:
 			return true;
 	}
 
@@ -1824,7 +1858,7 @@ bool CGameLogic::CheckHuFormatStyle(const tagAnalyseItem *pAnalyseItem){
 		if( bOnlyShunzi && (pAnalyseItem->cbCardEye==SwitchToCardData(m_cbMagicIndex)) )
 			return true;
 
-		if( bOnlyShunzi && (pAnalyseItem->cbCardEye>30 && pAnalyseItem->cbCardEye<34) ){ // 中， 发， 白
+		if( bOnlyShunzi && (pAnalyseItem->cbCardEye>=0x35 && pAnalyseItem->cbCardEye<=0x37) ){ // 中， 发， 白
 			return true;
 		}
 	}
