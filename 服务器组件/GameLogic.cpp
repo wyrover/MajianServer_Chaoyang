@@ -1114,7 +1114,7 @@ BYTE CGameLogic::GetRandHuiPaiCardIndex( )
 BYTE CGameLogic::SwitchToCardData(BYTE cbCardIndex)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
-	ASSERT(cbCardIndex<MAX_INDEX);
+	//ASSERT(cbCardIndex<MAX_INDEX);
 	if( cbCardIndex>=MAX_INDEX ) return INVAILD_CARD_DATA;
 
 	if(cbCardIndex < 27)
@@ -1126,7 +1126,7 @@ BYTE CGameLogic::SwitchToCardData(BYTE cbCardIndex)
 BYTE CGameLogic::SwitchToCardIndex(BYTE cbCardData)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
-	ASSERT(IsValidCard(cbCardData));
+	//ASSERT(IsValidCard(cbCardData));
 	if( !IsValidCard(cbCardData) ) return INVAILD_CARD_INDEX;
 
 	return ((cbCardData & MASK_COLOR) >> 4) * 9 + (cbCardData & MASK_VALUE) - 1;
@@ -1482,7 +1482,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 	BYTE cbMagicCardCount = 0;
 	BYTE cbTempMagicCount = 0;
 
-	if(IsValidCard(SwitchToCardData(m_cbMagicIndex)))
+	if(m_cbMagicIndex != INVAILD_CARD_INDEX)
 	{
 		cbMagicCardCount = cbCardIndex[m_cbMagicIndex];
 		//如果财神有代替牌，财神与代替牌转换
