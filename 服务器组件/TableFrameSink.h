@@ -251,6 +251,8 @@ protected:
 	//·¢ËÍ²Ù×÷
 	bool SendOperateNotify();
 
+	bool SendOperateNotifyWithRank();
+
 	BYTE CreateNewBaopaiIndex();
 
 	bool UpdateBaoPaiIfNeed();
