@@ -61,7 +61,6 @@ CTableFrameSink::CTableFrameSink()
 	ZeroMemory(m_bEnjoinChiHu, sizeof(m_bEnjoinChiHu));
 	ZeroMemory(m_bEnjoinChiPeng, sizeof(m_bEnjoinChiPeng));
 	ZeroMemory(m_bEnjoinGang, sizeof(m_bEnjoinGang));
-	ZeroMemory(m_bGangCard, sizeof(m_bGangCard));
 	ZeroMemory(m_cbChiPengCount, sizeof(m_cbChiPengCount));	
 	ZeroMemory(m_cbGangCount, sizeof(m_cbGangCount));
 
@@ -162,7 +161,6 @@ VOID CTableFrameSink::RepositionSink()
 	ZeroMemory(m_bEnjoinChiPeng, sizeof(m_bEnjoinChiPeng));	
 	ZeroMemory(m_bEnjoinGang, sizeof(m_bEnjoinGang));
 	ZeroMemory(m_cbChiPengCount, sizeof(m_cbChiPengCount));
-	ZeroMemory(m_bGangCard, sizeof(m_bGangCard));	
 	ZeroMemory(m_cbGangCount, sizeof(m_cbGangCount));
 
 	for(int i = 0; i < GAME_PLAYER; i++)
@@ -525,6 +523,7 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 
 			bool bFirstWinner = false;
 			WORD wWinner=INVALID_CHAIR;
+			BYTE cbKaimen = 0;
 			//结束信息
 			for (WORD i = 0; i < m_cbPlayerCount; i++)
 			{
@@ -536,13 +535,22 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 						bFirstWinner = true;
 						wWinner = k;
 						FiltrateRight(k, m_ChiHuRight[k]);
-						m_ChiHuRight[k].GetRightData(GameConclude.dwChiHuRight[k], MAX_RIGHT_COUNT);
 					} else {
 						m_dwChiHuKind[k] ^= WIK_KIND_HU;
 					}
 				}
-				GameConclude.dwChiHuKind[k] = m_dwChiHuKind[k];
-				GameConclude.cbCardCount[k] = m_GameLogic.SwitchToCardData(m_cbCardIndex[k], GameConclude.cbHandCardData[k]);
+				if( m_cbWeaveItemCount[i] > 0)
+					cbKaimen |= 1<<i;
+			}
+
+			for(WORD i=0; i<m_cbPlayerCount; i++){
+				if( m_dwChiHuKind[i] == WIK_KIND_HU){
+					if( (cbKaimen & (0xFF^(1<<i))) == 0)
+						m_ChiHuRight[i] |= CHR_QI_YU;
+					m_ChiHuRight[i].GetRightData(GameConclude.dwChiHuRight[i], MAX_RIGHT_COUNT);
+				}
+				GameConclude.dwChiHuKind[i] = m_dwChiHuKind[i];
+				GameConclude.cbCardCount[i] = m_GameLogic.SwitchToCardData(m_cbCardIndex[i], GameConclude.cbHandCardData[i]);
 			}
 
 			//计算胡牌输赢分
@@ -1283,7 +1291,7 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
  
  			//结束游戏
  			ASSERT(m_dwChiHuKind[wTargetUser] != WIK_NORMAL);
- 			OnEventGameConclude(m_wProvideUser, NULL, GER_NORMAL);
+ 			OnEventGameConclude(wTargetUser, NULL, GER_NORMAL);
  
  			return true;
  		}
@@ -1474,7 +1482,6 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
  		{
  			m_cbGangStatus = WIK_MING_GANG;
 			m_wProvideGangUser = (m_wProvideUser == INVALID_CHAIR) ? wTargetUser : m_wProvideUser;
-			m_bGangCard[wTargetUser] = true;
 			m_cbGangCount[wTargetUser]++;
  			DispatchCardData(wTargetUser, true);
  		}
@@ -1563,7 +1570,6 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
  				m_cbCardIndex[wChairID][cbCardIndex] = 0;
 				m_cbGangStatus = cbGangKind;
 				m_wProvideGangUser = wProvideUser;
-				m_bGangCard[wChairID] = true;
 				m_cbGangCount[wChairID]++;
  
  				//构造结果
@@ -1622,7 +1628,6 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				m_GameLogic.TakeOutSpGang(m_cbCardIndex[wChairID], WIK_WIND);
 				m_cbGangStatus = WIK_WND_GANG;
 				m_wProvideGangUser = wChairID;
-				m_bGangCard[wChairID] = true;
 				m_cbGangCount[wChairID]++;
 
 				//构造结果
@@ -1671,7 +1676,6 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				m_GameLogic.TakeOutSpGang(m_cbCardIndex[wChairID], WIK_ARROW);
 				m_cbGangStatus = WIK_ARW_GANG;
 				m_wProvideGangUser = wChairID;
-				m_bGangCard[wChairID] = true;
 				m_cbGangCount[wChairID]++;
 
 				tagGangCardResult gcr;
@@ -1721,7 +1725,6 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				m_GameLogic.TakeOutCHMGang(m_cbCardIndex[wChairID],cbOperateCard[0]);
 				m_cbGangStatus = WIK_CHASE_WND_GANG;
 				m_wProvideGangUser = wChairID;
-				m_bGangCard[wChairID] = true;
 				//	m_cbGangCount[wChairID]++;
 
 				//构造结果
@@ -1776,7 +1779,6 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				m_GameLogic.TakeOutCHMGang(m_cbCardIndex[wChairID],cbOperateCard[0]);
 				m_cbGangStatus = WIK_CHASE_ARW_GANG;
 				m_wProvideGangUser = wChairID;
-				m_bGangCard[wChairID] = true;
 				//	m_cbGangCount[wChairID]++;
 
 
@@ -2392,8 +2394,9 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 	ZeroMemory(m_wPerformAction, sizeof(m_wPerformAction));
 
 	//动作判断
-	for (WORD i = 0; i < m_cbPlayerCount; i++)
+	for (WORD k = 0; k < m_cbPlayerCount; k++)
 	{
+		WORD i = (wCenterUser+k+1)%m_cbPlayerCount;
 		//用户过滤
 		if (wCenterUser == i || !m_bPlayStatus[i] || m_bTrustee[i]) continue;
 
@@ -2453,7 +2456,7 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 						break;
 					}
 				}
-				if(bChiHu)
+				if(bChiHu && m_bTing[i])
 				{
 					//吃胡判断
 					CChiHuRight chr;
@@ -2804,18 +2807,35 @@ bool CTableFrameSink::processQiangGangHu(BYTE cbGangStatus, WORD wUser, WORD wPr
 		case WIK_BU_GANG:
 			{
 				ASSERT(m_cbGangCount[wProvider]>0);
-				m_cbGangCount[wProvider]++;
+				m_cbGangCount[wProvider]--;
 
-				m_bGangCard[wProvider] = false;
+				BYTE cbWeaveIndex=0xFF;
+				for (BYTE i = 0; i < m_cbWeaveItemCount[wProvider]; i++)
+				{
+					WORD cbParam = m_WeaveItemArray[wProvider][i].cbParam;
+					BYTE cbCenterCard = m_WeaveItemArray[wProvider][i].cbCenterCard;
+					if ((cbCenterCard == m_cbChiHuCard) && (cbParam == WIK_BU_GANG))
+					{
+						cbWeaveIndex = i;
+						break;
+					}
+				}
+				ASSERT(cbWeaveIndex<MAX_WEAVE);
+				if(cbWeaveIndex<MAX_WEAVE){
+					//组合扑克
+					m_WeaveItemArray[wProvider][cbWeaveIndex].cbParam = WIK_GANERAL;
+					m_WeaveItemArray[wProvider][cbWeaveIndex].wWeaveKind = WIK_PENG;
+					m_WeaveItemArray[wProvider][cbWeaveIndex].cbCardData[3] = INVAILD_CARD_DATA;
+				}
+
 				break;
 			}
 		case WIK_CHASE_WND_GANG:
 		case WIK_CHASE_ARW_GANG:
 			{
 				ASSERT(m_nChaseArrowCount[wProvider]>0);
-				m_cbChaseArrowArray[wProvider][--m_nChaseArrowCount[wProvider]] = 0;
+				m_cbChaseArrowArray[wProvider][--m_nChaseArrowCount[wProvider]] = INVAILD_CARD_DATA;
 
-				m_bGangCard[wProvider] = false;
 				break;
 			}
 		default:

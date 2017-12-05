@@ -77,7 +77,6 @@ protected:
 	bool							m_bEnjoinChiHu[GAME_PLAYER];					//禁止吃胡
 	bool							m_bEnjoinChiPeng[GAME_PLAYER];					//禁止吃碰
 	bool							m_bEnjoinGang[GAME_PLAYER];						//禁止杠牌
-	bool							m_bGangCard[GAME_PLAYER];						//杠牌状态
 	WORD						m_wLianZhuang;									//连庄次数
 	BYTE							m_cbGangCount[GAME_PLAYER];						//杠牌次数	
 	BYTE							m_cbChiPengCount[GAME_PLAYER];		//吃碰杠次数	
