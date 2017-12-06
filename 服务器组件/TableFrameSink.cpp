@@ -1167,22 +1167,14 @@ bool CTableFrameSink::OnUserOutCard(WORD wChairID, BYTE cbCardData,bool bSysOut/
 	m_cbOutFromHandCount[wChairID]++;
 
 	//响应判断
- 	bool bAroseAction = EstimateUserRespond(wChairID, cbCardData, EstimatKind_OutCard);
- 
-	if(m_cbGangStatus != WIK_GANERAL)
-	{
-		m_bGangOutCard = true;
-		m_cbGangStatus = WIK_GANERAL;
-		m_wProvideGangUser = INVALID_CHAIR;
-	}
-	else
-	{
-		m_bGangOutCard = false;
-	}
+ 	bool bAroseAction = EstimateUserRespond(wChairID, cbCardData, EstimatKind_OutCard); 
+	m_bGangOutCard = (m_cbGangStatus!=WIK_GANERAL);
 
  	//派发扑克
  	if (!bAroseAction) 
 	{
+		m_cbGangStatus = WIK_GANERAL;
+		m_wProvideGangUser = INVALID_CHAIR;
 		DispatchCardData(m_wCurrentUser);
 	}
 
@@ -1284,7 +1276,9 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
  				}
  			}
 
-			if( (m_cbGangStatus&(WIK_BU_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG)) != 0 && wChairID!=m_wProvideUser){
+			if( !m_bGangOutCard
+				&& (m_cbGangStatus&(WIK_BU_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG)) != 0 
+				&& wChairID!=m_wProvideUser){
 				ASSERT(m_wProvideUser!=INVALID_CHAIR);
 				processQiangGangHu(m_cbGangStatus, wChairID, m_wProvideUser);
 			}
@@ -2304,7 +2298,7 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 				m_cbWeaveItemCount[wCurrentUser], m_cbProvideCard, chr);
 			m_cbCardIndex[wCurrentUser][m_GameLogic.SwitchToCardIndex(m_cbProvideCard)]++;
 
-			if( m_GameLogic.IsBaoPaiCard(m_cbProvideCard) && m_bTing[wCurrentUser] ){ // for the TEST 
+			if( m_GameLogic.IsBaoPaiCard(m_cbProvideCard) && m_bTing[wCurrentUser] ){
 				chr |= CHR_JIN_BAO;
 
 				m_ChiHuRight[wCurrentUser] = chr;
@@ -2403,7 +2397,7 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 		//出牌类型
 		if (EstimatKind == EstimatKind_OutCard )
 		{
-			if( m_bTing[i]){
+			if( m_bTing[i] || m_cbGangStatus!=WIK_GANERAL){
 				CChiHuRight chr;
 				BYTE cbWeaveCount = m_cbWeaveItemCount[i];
 				BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
@@ -2679,14 +2673,11 @@ void CTableFrameSink::FiltrateRight(WORD wWinner, CChiHuRight &chr)
 	if((wWinner == m_wProvideUser) || (m_wProvideUser==INVALID_CHAIR))
 	{
 		chr |= CHR_ZI_MO;
-		if(m_cbGangStatus&(WIK_BU_GANG|WIK_AN_GANG|WIK_MING_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG|WIK_WND_GANG))
+		if( m_cbGangStatus&(WIK_BU_GANG|WIK_AN_GANG|WIK_MING_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG|WIK_WND_GANG))
 			chr |= CHR_GANG_SHANG_HUA;
 	}
 	else {
-		if(m_cbGangStatus == WIK_BU_GANG)
-			chr |= CHR_QIANG_GANG_HU;
-
-		if( m_cbGangStatus&(WIK_BU_GANG|WIK_AN_GANG|WIK_MING_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG|WIK_WND_GANG) )
+		if( m_bGangOutCard && m_cbGangStatus&(WIK_BU_GANG|WIK_AN_GANG|WIK_MING_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG|WIK_WND_GANG) )
 			chr |= CHR_GANG_SHANG_PAO;
 
 	}
@@ -2828,6 +2819,7 @@ bool CTableFrameSink::processQiangGangHu(BYTE cbGangStatus, WORD wUser, WORD wPr
 					m_WeaveItemArray[wProvider][cbWeaveIndex].cbCardData[3] = INVAILD_CARD_DATA;
 				}
 
+				m_dwChiHuKind[wUser] |= CHR_QIANG_GANG_HU;
 				break;
 			}
 		case WIK_CHASE_WND_GANG:
@@ -2835,9 +2827,11 @@ bool CTableFrameSink::processQiangGangHu(BYTE cbGangStatus, WORD wUser, WORD wPr
 			{
 				ASSERT(m_nChaseArrowCount[wProvider]>0);
 				m_cbChaseArrowArray[wProvider][--m_nChaseArrowCount[wProvider]] = INVAILD_CARD_DATA;
-
+                
+				m_dwChiHuKind[wUser] |= CHR_QIANG_GANG_HU;
 				break;
 			}
+
 		default:
 			break;
 	}
