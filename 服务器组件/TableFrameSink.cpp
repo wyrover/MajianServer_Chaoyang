@@ -554,7 +554,11 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 			tagScoreInfo ScoreInfoArray[GAME_PLAYER];
 			ZeroMemory(&ScoreInfoArray, sizeof(ScoreInfoArray));
 
-			GameConclude.wProvideUser = m_wProvideUser;
+			if( wWinner != INVALID_CHAIR && wWinner != m_wProvideUser) {
+				GameConclude.wProvideUser = m_wProvideUser;
+			} else {
+				GameConclude.wProvideUser = INVALID_CHAIR;
+			}
 			GameConclude.cbProvideCard = m_cbProvideCard;
 
 			GameConclude.cbBaopaiCardData = m_GameLogic.SwitchToCardData(m_cbBaoPaiIndex);
