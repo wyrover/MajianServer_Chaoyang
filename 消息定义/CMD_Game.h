@@ -288,6 +288,7 @@ struct CMD_S_GameConclude
 	BYTE							cbHandCardData[GAME_PLAYER][MAX_COUNT];//扑克列表
 
 	BYTE							cbBaopaiCardData;	                   // Bao Pai Card
+	BYTE							cbKaiMenStatus;	                   // Kaimen or Bimen status, for example : 0x05 -> first and third users are Kaimen and others Bimen
 };
 
 //用户托管

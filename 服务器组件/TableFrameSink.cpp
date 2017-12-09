@@ -523,7 +523,7 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 
 			bool bFirstWinner = false;
 			WORD wWinner=INVALID_CHAIR;
-			BYTE cbKaimen = 0;
+			BYTE cbKaiMenStatus = 0;
 			//结束信息
 			for (WORD i = 0; i < m_cbPlayerCount; i++)
 			{
@@ -535,27 +535,20 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 						bFirstWinner = true;
 						wWinner = k;
 						FiltrateRight(k, m_ChiHuRight[k]);
+						m_ChiHuRight[i].GetRightData(GameConclude.dwChiHuRight[i], MAX_RIGHT_COUNT);
 					} else {
 						m_dwChiHuKind[k] ^= WIK_KIND_HU;
 					}
 				}
-				if( m_cbWeaveItemCount[i] > 0)
-					cbKaimen |= 1<<i;
-			}
-
-			for(WORD i=0; i<m_cbPlayerCount; i++){
-				if( m_dwChiHuKind[i] == WIK_KIND_HU){
-					if( (cbKaimen & (0xFF^(1<<i))) == 0)
-						m_ChiHuRight[i] |= CHR_QI_YU;
-					m_ChiHuRight[i].GetRightData(GameConclude.dwChiHuRight[i], MAX_RIGHT_COUNT);
-				}
 				GameConclude.dwChiHuKind[i] = m_dwChiHuKind[i];
 				GameConclude.cbCardCount[i] = m_GameLogic.SwitchToCardData(m_cbCardIndex[i], GameConclude.cbHandCardData[i]);
+				if( !m_GameLogic.isOpenedKaimen(m_WeaveItemArray[i], m_cbWeaveItemCount[i]))
+					cbKaiMenStatus |= 1<<i;
 			}
 
 			//计算胡牌输赢分
 			SCORE lUserGameScore[GAME_PLAYER]={0};
-			CalHuPaiScore(wWinner, lUserGameScore);
+			CalHuPaiScore(wWinner, lUserGameScore, cbKaiMenStatus);
 
 			//积分变量
 			tagScoreInfo ScoreInfoArray[GAME_PLAYER];
@@ -565,6 +558,7 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 			GameConclude.cbProvideCard = m_cbProvideCard;
 
 			GameConclude.cbBaopaiCardData = m_GameLogic.SwitchToCardData(m_cbBaoPaiIndex);
+			GameConclude.cbKaiMenStatus = cbKaiMenStatus;
 
 			//统计积分
 			for (WORD i = 0; i < m_cbPlayerCount; i++)
@@ -1425,7 +1419,7 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				cbCount =m_GameLogic.AnalyseTingCard(m_cbCardIndex[wTargetUser],m_WeaveItemArray[wTargetUser],m_cbWeaveItemCount[wTargetUser],HuData.cbOutCardCount,HuData.cbOutCardData,HuData.cbHuCardCount,HuData.cbHuCardData);
 				if(cbCount >0)
 				{
-					m_wUserAction[wTargetUser] |= WIK_LISTEN; 
+					//m_wUserAction[wTargetUser] |= WIK_LISTEN; 
 
 					for(int i=0;i<MAX_COUNT;i++)
 					{
@@ -2485,7 +2479,7 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 }
 
 //算分
-void CTableFrameSink::CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYER])
+void CTableFrameSink::CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYER], BYTE cbKaiMenStatus)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//初始化
@@ -2525,7 +2519,8 @@ void CTableFrameSink::CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYE
 				continue;
 			if( i != wWinnder)
 			{
-				SCORE lScoreItem = cbTimes*lCellScore;
+				BYTE times = cbTimes + (cbKaiMenStatus&(1<<i)) ? 1 : 0;
+				SCORE lScoreItem = times*lCellScore;
 				if( m_wBankerUser != wWinnder && i == m_wBankerUser)
 					lScoreItem *= 2;
 
@@ -2707,7 +2702,7 @@ void CTableFrameSink::SetGameBaseScore(LONG lBaseScore)
 DWORD CTableFrameSink::GetTimes(WORD wChairId)
 {
 	DWORD wFanShu = 1;
-	DWORD wSpHuPaiKind[] = {CHR_ZHUANG_JIA, CHR_QING_YI_SE, CHR_QI_YU, CHR_GANG_SHANG_PAO, 
+	DWORD wSpHuPaiKind[] = {CHR_ZHUANG_JIA, CHR_QING_YI_SE, CHR_GANG_SHANG_PAO, 
 		CHR_GANG_SHANG_HUA, CHR_FEN_ZHANG, CHR_SHOU_BA_YI, CHR_JIA_HU, CHR_JIN_BAO};
 
 	if( wChairId == INVALID_CHAIR) return wFanShu;

@@ -78,7 +78,7 @@
 #define CHR_GANG_SHANG_HUA          0x00010000          //杠上花
 #define CHR_GANG_SHANG_PAO          0x00020000          //杠上炮
 #define CHR_QIANG_GANG_HU           0x00040000          //抢杠胡
-#define CHR_QI_YU					0x00080000			//其余三家闭门
+//#define CHR_QI_YU					0x00080000			//其余三家闭门
 #define CHR_CHI_HU					0x00100000			//放炮
 
 //#define CHR_PENG_PENG				0x00000002							//碰碰胡
