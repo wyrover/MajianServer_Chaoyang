@@ -571,6 +571,8 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 				//胡牌分算完后再加上杠的输赢分就是玩家本轮最终输赢分
 				GameConclude.lGameScore[i] += m_lUserGangScore[i];
 				GameConclude.lGangScore[i] = m_lUserGangScore[i];
+				strLogScore.Format("%s %d,", strLogScore, lUserGameScore[i] );
+				strLogGangScore.Format("%s %d,", strLogGangScore, m_lUserGangScore[i] );
 
 				//收税
 				if (GameConclude.lGameScore[i]>0 && (m_pGameServiceOption->wServerType&GAME_GENRE_GOLD)!=0)
@@ -591,6 +593,10 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 					m_stRecord.lAllScore[i] += GameConclude.lGameScore[i];
 				}
 			}
+			strLogScore.Format("%s }", strLogScore);
+			strLogGangScore.Format("%s }", strLogGangScore);
+			OutputDebugStringA(strLogScore);
+			OutputDebugStringA(strLogGangScore);
 
 			if( wWinner != INVALID_CHAIR){
 				if(GameConclude.dwChiHuRight[wWinner][0]&CHR_ZI_MO){
@@ -2392,7 +2398,7 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 		//出牌类型
 		if (EstimatKind == EstimatKind_OutCard )
 		{
-			if( m_bTing[i] || m_cbGangStatus!=WIK_GANERAL){
+			if( m_bTing[i] ){
 				CChiHuRight chr;
 				BYTE cbWeaveCount = m_cbWeaveItemCount[i];
 				BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
