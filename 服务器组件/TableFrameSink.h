@@ -267,7 +267,7 @@ protected:
 	//响应判断
 	bool EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, enEstimatKind EstimatKind);
 	//算胡牌分
-	void CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYER], BYTE cbKaiMenStatus);
+	void CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYER], BYTE cbBiMenStatus);
 	//算杠分
 	void CalGangScore();
 	//权位过滤
