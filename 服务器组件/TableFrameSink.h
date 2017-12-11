@@ -275,11 +275,15 @@ protected:
 	//¼ÆËã±¶Êý
 	DWORD GetTimes(WORD wChairId);
 
+	DWORD GetTimesOfUser(WORD wUserId, WORD wWinnerId, bool isBiMen);
+
 	BYTE GetRemainingCount(WORD wChairID,BYTE cbCardData);
 
 	bool OnEventFenZhang();
 
 	bool processQiangGangHu(BYTE cbGangStatus, WORD wUser, WORD wProvider);
+
+	bool ExistInArray(BYTE cbStatus, BYTE cbArray[], WORD nCount);
 };
 
 #endif

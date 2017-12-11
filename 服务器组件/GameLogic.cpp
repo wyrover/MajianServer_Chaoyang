@@ -1069,7 +1069,7 @@ bool CGameLogic::isOpenedKaimen(const tagWeaveItem WeaveItem[], BYTE cbWeaveCoun
 	for(int i=0; i<cbWeaveCount; i++){
 		if( WeaveItem[i].wWeaveKind&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) )
 			return true;
-		if( (WeaveItem[i].wWeaveKind&(WIK_GANG)) && (WeaveItem[i].cbParam&WIK_AN_GANG)==0)
+		if( WeaveItem[i].wWeaveKind==WIK_GANG && (WeaveItem[i].cbParam!=WIK_AN_GANG) )
 			return true;
 	}
 	return false;

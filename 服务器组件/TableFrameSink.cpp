@@ -535,7 +535,7 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 						bFirstWinner = true;
 						wWinner = k;
 						FiltrateRight(k, m_ChiHuRight[k]);
-						m_ChiHuRight[i].GetRightData(GameConclude.dwChiHuRight[k], MAX_RIGHT_COUNT);
+						m_ChiHuRight[k].GetRightData(GameConclude.dwChiHuRight[k], MAX_RIGHT_COUNT);
 					} else {
 						m_dwChiHuKind[k] ^= WIK_KIND_HU;
 					}
@@ -564,7 +564,7 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 			GameConclude.cbBaopaiCardData = m_GameLogic.SwitchToCardData(m_cbBaoPaiIndex);
 			GameConclude.cbBiMenStatus = cbBiMenStatus;
 
-			CStringA strLogScore= "\n\tlUserGameScore = {", strLogGangScore="\n\tm_lUserGangScore = {";
+			//CStringA strLogScore= "\n\tlUserGameScore = {", strLogGangScore="\n\tm_lUserGangScore = {";
 			//统计积分
 			for (WORD i = 0; i < m_cbPlayerCount; i++)
 			{
@@ -575,8 +575,8 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 				//胡牌分算完后再加上杠的输赢分就是玩家本轮最终输赢分
 				GameConclude.lGameScore[i] += m_lUserGangScore[i];
 				GameConclude.lGangScore[i] = m_lUserGangScore[i];
-				strLogScore.Format("%s %d,", strLogScore, lUserGameScore[i] );
-				strLogGangScore.Format("%s %d,", strLogGangScore, m_lUserGangScore[i] );
+				//strLogScore.Format("%s %I64d,", strLogScore, lUserGameScore[i] );
+				//strLogGangScore.Format("%s %I64d,", strLogGangScore, m_lUserGangScore[i] );
 
 				//收税
 				if (GameConclude.lGameScore[i]>0 && (m_pGameServiceOption->wServerType&GAME_GENRE_GOLD)!=0)
@@ -597,10 +597,10 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 					m_stRecord.lAllScore[i] += GameConclude.lGameScore[i];
 				}
 			}
-			strLogScore.Format("%s }", strLogScore);
-			strLogGangScore.Format("%s }", strLogGangScore);
-			OutputDebugStringA(strLogScore);
-			OutputDebugStringA(strLogGangScore);
+			//strLogScore.Format("%s }", strLogScore);
+			//strLogGangScore.Format("%s }", strLogGangScore);
+			//OutputDebugStringA(strLogScore);
+			//OutputDebugStringA(strLogGangScore);
 
 			if( wWinner != INVALID_CHAIR){
 				if(GameConclude.dwChiHuRight[wWinner][0]&CHR_ZI_MO){
@@ -668,6 +668,7 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 			{
 				GameConclude.cbCardCount[i] = m_GameLogic.SwitchToCardData(m_cbCardIndex[i], GameConclude.cbHandCardData[i]);
 			}
+			GameConclude.wProvideUser = INVALID_CHAIR;
 			GameConclude.cbBaopaiCardData = m_GameLogic.SwitchToCardData(m_cbBaoPaiIndex);
 
 			//发送信息
@@ -1280,9 +1281,10 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 					//break;
  				}
  			}
-
+			
+			BYTE cbArrQiangGang[] = {WIK_BU_GANG,WIK_CHASE_WND_GANG,WIK_CHASE_ARW_GANG};
 			if( !m_bGangOutCard
-				&& (m_cbGangStatus&(WIK_BU_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG)) != 0 
+				&& ExistInArray(m_cbGangStatus ,cbArrQiangGang, CountArray(cbArrQiangGang)) 
 				&& wChairID!=m_wProvideUser){
 				ASSERT(m_wProvideUser!=INVALID_CHAIR);
 				processQiangGangHu(m_cbGangStatus, wChairID, m_wProvideUser);
@@ -2519,7 +2521,6 @@ void CTableFrameSink::CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYE
 	if( wWinnder!=INVALID_CHAIR ){
 		m_stRecord.cbHuCount[wWinnder]++;
 
-		DWORD cbTimes = GetTimes(wWinnder);
 
 		DWORD dwHuRight[MAX_RIGHT_COUNT];
 		m_ChiHuRight[wWinnder].GetRightData(dwHuRight, MAX_RIGHT_COUNT);
@@ -2530,9 +2531,9 @@ void CTableFrameSink::CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYE
 				continue;
 			if( i != wWinnder)
 			{
-				BYTE times = cbTimes + ((cbBiMenStatus&(1<<i) == 0) ? 0 : 1);
-				SCORE lScoreItem = times*lCellScore;
-				if( m_wBankerUser != wWinnder && i == m_wBankerUser)
+				DWORD cbTimes = GetTimesOfUser(i, wWinnder, (cbBiMenStatus&(1<<i))!=0);
+				SCORE lScoreItem = cbTimes*lCellScore;
+				if( i == m_wBankerUser)		// already i != wWinnder, so
 					lScoreItem *= 2;
 
 				if(m_tGameCustomRule.bEnabled_DianPao && !(dwHuRight[0]&CHR_ZI_MO) ){
@@ -2679,11 +2680,17 @@ void CTableFrameSink::FiltrateRight(WORD wWinner, CChiHuRight &chr)
 	if((wWinner == m_wProvideUser) || (m_wProvideUser==INVALID_CHAIR))
 	{
 		chr |= CHR_ZI_MO;
-		if( m_cbGangStatus&(WIK_BU_GANG|WIK_AN_GANG|WIK_MING_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG|WIK_WND_GANG))
+
+		BYTE cbArrGangShangHua[] = {WIK_BU_GANG,WIK_AN_GANG,WIK_MING_GANG,WIK_CHASE_WND_GANG,WIK_CHASE_ARW_GANG,WIK_WND_GANG};
+		
+		if( ExistInArray(m_cbGangStatus ,cbArrGangShangHua, CountArray(cbArrGangShangHua)) )
 			chr |= CHR_GANG_SHANG_HUA;
 	}
 	else {
-		if( m_bGangOutCard && m_cbGangStatus&(WIK_BU_GANG|WIK_AN_GANG|WIK_MING_GANG|WIK_CHASE_WND_GANG|WIK_CHASE_ARW_GANG|WIK_WND_GANG) )
+
+		BYTE cbArrGangShangPao[] = {WIK_BU_GANG,WIK_AN_GANG,WIK_MING_GANG,WIK_CHASE_WND_GANG,WIK_CHASE_ARW_GANG,WIK_WND_GANG};
+
+		if( ExistInArray(m_cbGangStatus ,cbArrGangShangPao, CountArray(cbArrGangShangPao)) )
 			chr |= CHR_GANG_SHANG_PAO;
 
 	}
@@ -2726,6 +2733,27 @@ DWORD CTableFrameSink::GetTimes(WORD wChairId)
 		if( wSpHuPaiKind[i] & dwRight[0] )
 			wFanShu *= 2;
 	}
+	return wFanShu;//2^n( 番数 )
+}
+
+DWORD CTableFrameSink::GetTimesOfUser(WORD wUserId, WORD wWinnerId, bool isBiMen)
+{
+	DWORD wFanShu = 1;
+	DWORD wSpHuPaiKind[] = {CHR_ZHUANG_JIA, CHR_QING_YI_SE, CHR_GANG_SHANG_PAO, 
+		CHR_GANG_SHANG_HUA, CHR_FEN_ZHANG, CHR_SHOU_BA_YI, CHR_JIA_HU, CHR_JIN_BAO};
+
+	if( wWinnerId == INVALID_CHAIR) return wFanShu;
+
+	DWORD dwRight[MAX_RIGHT_COUNT];
+	m_ChiHuRight[wWinnerId].GetRightData(dwRight, MAX_RIGHT_COUNT);
+
+	BYTE nTime = 0;
+	for(int i=0; i<CountArray(wSpHuPaiKind); i++){
+		if( wSpHuPaiKind[i] & dwRight[0] )
+			wFanShu *= 2;
+	}
+	if(isBiMen)
+		wFanShu *= 2;
 	return wFanShu;//2^n( 番数 )
 }
 
@@ -2843,4 +2871,14 @@ bool CTableFrameSink::processQiangGangHu(BYTE cbGangStatus, WORD wUser, WORD wPr
 	}
 	return true;
 }
+
+bool CTableFrameSink::ExistInArray(BYTE cbStatus, BYTE cbArray[], WORD nCount){
+	for( int i=0; i<nCount; i++){
+		if( cbStatus == cbArray[i]){
+			return true;
+		}
+	}
+	return false;
+}
+
 //////////////////////////////////////////////////////////////////////////////////
