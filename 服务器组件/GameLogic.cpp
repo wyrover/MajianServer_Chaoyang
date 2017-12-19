@@ -839,11 +839,11 @@ WORD CGameLogic::AnalyseGangCardEx(const BYTE cbCardIndex[MAX_INDEX], const tagW
 	BYTE cbProvideCardIndex = INVAILD_CARD_INDEX;
 	if( IsValidCard(cbProvideCard) ) cbProvideCardIndex = SwitchToCardIndex(cbProvideCard);
 
-	if ( bChangMao && IsChaseArrow(cbProvideCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEWIND))
+	if ( bChangMao && IsPossibleChaseArrow(cbCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEWIND))
 	{
 		wActionMask |= WIK_CHASEWIND;
 	}
-	if ( bChangMao && IsChaseArrow(cbProvideCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEARROW))			//m_CustomRule.cbZhuiFeng && 
+	if ( bChangMao && IsPossibleChaseArrow(cbCardIndex,WeaveItem,cbWeaveCount,WIK_CHASEARROW))			//m_CustomRule.cbZhuiFeng && 
 	{
 		wActionMask |= WIK_CHASEARROW;
 	}
@@ -2111,6 +2111,45 @@ bool CGameLogic::IsChaseArrow(BYTE cbProvidedCardIndex,const tagWeaveItem WeaveI
 		}
 	default:
 		{
+			break;
+		}
+	}
+	return false;
+}
+
+bool CGameLogic::IsPossibleChaseArrow(const BYTE cbHandCards[MAX_INDEX],const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode){
+	switch (dwOpCode)
+	{
+	case WIK_CHASEWIND:											//【东】【南】【西】【北】
+		{
+			for (int i = 0;i<cbWeaveICount;i++)
+			{
+				if (WeaveItem[i].wWeaveKind ==WIK_WIND) {
+					if( cbHandCards[27] > 0
+						|| cbHandCards[28] > 0
+						|| cbHandCards[29] > 0
+						|| cbHandCards[30] > 0)
+						return true;
+					else
+						return false;
+				}
+			}
+			break;
+		}
+	case WIK_CHASEARROW:											//【中】【发】【白】
+		{
+			for (int i = 0;i<cbWeaveICount;i++)
+			{
+				if (WeaveItem[i].wWeaveKind == WIK_ARROW)	
+				{
+					if( cbHandCards[31] > 0
+						|| cbHandCards[32] > 0
+						|| cbHandCards[33] > 0)
+						return true;
+					else
+						return false;
+				}
+			}
 			break;
 		}
 	}

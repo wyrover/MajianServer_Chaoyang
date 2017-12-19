@@ -359,6 +359,8 @@ public:
 
 	bool IsChaseArrow(BYTE cbProvidedCardIndex,const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode);
 
+	bool IsPossibleChaseArrow(const BYTE cbHandCards[MAX_INDEX],const tagWeaveItem WeaveItem[], BYTE cbWeaveICount,DWORD dwOpCode);
+
 #ifdef CARD_DISPATCHER_CONTROL
 	void printLogAnalyseItems(BYTE cbHuCard, CAnalyseItemArray* arr);
 #endif

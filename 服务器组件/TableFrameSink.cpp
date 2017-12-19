@@ -1693,7 +1693,6 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				//删除扑克
 				m_GameLogic.TakeOutSpGang(m_cbCardIndex[wChairID], WIK_ARROW);
 				m_cbGangStatus = WIK_ARW_GANG;
-				m_wProvideGangUser = wChairID;
 				m_cbGangCount[wChairID]++;
 
 				tagGangCardResult gcr;
@@ -1722,11 +1721,10 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 		case WIK_CHASEWIND:		//东南西北 长毛杠（风）
 			{
 				m_enSendStatus = Gang_Send;
-				WORD wProvideUser = wChairID;
 				//变量定义
 				BYTE cbCardIndex = m_GameLogic.SwitchToCardIndex(cbOperateCard[0]);
 				//扑克效验
-				if (!m_GameLogic.IsChaseArrow(cbCardIndex, m_WeaveItemArray[wProvideUser],MAX_WEAVE,WIK_CHASEWIND)) {
+				if (!m_GameLogic.IsChaseArrow(cbCardIndex, m_WeaveItemArray[wChairID],MAX_WEAVE,WIK_CHASEWIND)) {
 					ASSERT(FALSE);
 					return false;
 				}
@@ -1739,11 +1737,9 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				m_cbChaseArrowArray[wChairID][m_nChaseArrowCount[wChairID]++] = cbOperateCard[0];
 
 				//删除扑克
-				//m_cbCardIndex[wChairID][cbOperateCard] = 0;		//长毛杠只使用cbOperateCard的0号
 				m_GameLogic.TakeOutCHMGang(m_cbCardIndex[wChairID],cbOperateCard[0]);
 				m_cbGangStatus = WIK_CHASE_WND_GANG;
 				m_wProvideGangUser = wChairID;
-				//	m_cbGangCount[wChairID]++;
 
 				//构造结果
 				CMD_S_OperateResult OperateResult;
@@ -1775,12 +1771,11 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 		case WIK_CHASEARROW:			//中发白【长毛杠】
 			{
 				m_enSendStatus = Gang_Send;
-				WORD wProvideUser = wChairID;
 				//变量定义
 				BYTE cbCardIndex = m_GameLogic.SwitchToCardIndex(cbOperateCard[0]);
 				
 				//扑克效验
-				if (!m_GameLogic.IsChaseArrow(cbCardIndex, m_WeaveItemArray[wProvideUser],MAX_WEAVE,WIK_CHASEARROW)) {
+				if (!m_GameLogic.IsChaseArrow(cbCardIndex, m_WeaveItemArray[wChairID],MAX_WEAVE,WIK_CHASEARROW)) {
 					ASSERT(FALSE);
 					return false;
 				}
@@ -1793,11 +1788,9 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				m_cbChaseArrowArray[wChairID][m_nChaseArrowCount[wChairID]++] = cbOperateCard[0];
 
 				//删除扑克
-				//m_cbCardIndex[wChairID][cbOperateCard] = 0;		//长毛杠只使用cbOperateCard的0号
 				m_GameLogic.TakeOutCHMGang(m_cbCardIndex[wChairID],cbOperateCard[0]);
 				m_cbGangStatus = WIK_CHASE_ARW_GANG;
 				m_wProvideGangUser = wChairID;
-				//	m_cbGangCount[wChairID]++;
 
 
 				//构造结果
