@@ -49,6 +49,7 @@
 #define WIK_WIND					0x0200							//【东南西北】四张【风牌】在一起组成的杠
 #define WIK_CHASEARROW				0x0400							//【中发白】的杠追加【中发白】牌后的杠
 #define WIK_CHASEWIND				0x0800							//【东南西北】的杠追加风牌后的杠
+#define WIK_FEN_ZHANG				0x4000
 #define WIK_UPDATE_BAO				0x8000							// UPDATED BAO PAI
 
 
@@ -80,18 +81,6 @@
 #define CHR_QIANG_GANG_HU           0x00040000          //抢杠胡
 //#define CHR_QI_YU					0x00080000			//其余三家闭门
 #define CHR_CHI_HU					0x00100000			//放炮
-
-//#define CHR_PENG_PENG				0x00000002							//碰碰胡
-//#define CHR_DAN_DIAN_QI_DUI			0x00000004							//单点七对
-//#define CHR_MA_QI_DUI				0x00000008							//麻七对
-//#define CHR_MA_QI_WANG				0x00000010							//麻七王
-//#define CHR_MA_QI_WZW				0x00000020							//麻七王中王
-//#define CHR_SHI_SAN_LAN				0x00000040							//十三烂
-//#define CHR_QX_SHI_SAN_LAN			0x00000080							//七星十三烂
-//#define CHR_TIAN_HU					0x00000100							//天胡
-//#define CHR_DI_HU					0x00000200							//地胡
-//#define CHR_QI_SHOU_LISTEN			0x00000400							//起首听
-//#define CHR_JIN_BAO					0x00000800							//进宝      // After this, must check Ting status
 
 
 //////////////////////////////////////////////////////////////////////////////////

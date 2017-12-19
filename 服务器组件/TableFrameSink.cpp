@@ -8,6 +8,8 @@
 #define IDI_OUT_CARD				3									//出牌定时器
 #define IDI_OPERATE_CARD			4									//操作定时器
 
+#define IDI_FENZHANG_DELAY			5									//海底分张间隔定时器
+
 //构造函数
 CTableFrameSink::CTableFrameSink()
 {
@@ -848,6 +850,21 @@ bool CTableFrameSink::OnEventSendGameScene(WORD wChairID, IServerUserItem * pISe
 bool CTableFrameSink::OnTimerMessage(DWORD dwTimerID, WPARAM wBindParam)
 {
 	OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
+	if(dwTimerID == IDI_FENZHANG_DELAY)
+	{
+		m_pITableFrame->KillGameTimer(dwTimerID);
+
+		//立刻发下一张
+		m_wCurrentUser = NextUserID(m_wCurrentUser);
+		if( m_cbLeftCardCount > FENZHANG_COUNT-m_cbPlayerCount){
+			DispatchCardData(m_wCurrentUser, false);
+
+		} else {
+			OnEventGameConclude(INVALID_CHAIR, NULL, GER_NORMAL);
+		}
+		return true;
+	}
+
 	if((m_pGameServiceOption->wServerType&GAME_GENRE_MATCH)!=0)
 	{
 		if(dwTimerID==IDI_CHECK_TABLE)
@@ -2250,15 +2267,6 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 		m_cbDiscardCount[m_wOutCardUser]++;
 	}
 
-	//荒庄结束
-	if (m_cbLeftCardCount <= FENZHANG_COUNT )//2-6码要多留一颗，一码全中不用
-	{
-		m_cbChiHuCard = 0;
-		OnEventFenZhang();
-
-		return true;
-	}
-
 	//发送扑克
 	if( m_cbGangStatus == WIK_ARW_GANG) {
 		//m_cbProvideCard = m_cbProvideCard;	// keep ProvideCard
@@ -2307,6 +2315,7 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 
 			if( m_GameLogic.IsBaoPaiCard(m_cbProvideCard) && m_bTing[wCurrentUser] ){
 				chr |= CHR_JIN_BAO;
+				if( m_cbLeftCardCount < FENZHANG_COUNT ) chr |= CHR_FEN_ZHANG;
 
 				m_ChiHuRight[wCurrentUser] = chr;
 				m_dwChiHuKind[wCurrentUser] = WIK_KIND_HU;
@@ -2370,15 +2379,39 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 	}
 	SendCard.cbCardData = m_cbSendCardData;
 
+	//荒庄结束
+	if (m_cbLeftCardCount < FENZHANG_COUNT )//2-6码要多留一颗，一码全中不用
+	{
+		m_cbChiHuCard = INVAILD_CARD_DATA;
+		SendCard.wActionMask |= WIK_FEN_ZHANG;
+		SendCard.wActionMask &= (WIK_CHI_HU | WIK_FEN_ZHANG);
+
+		if ( (SendCard.wActionMask&WIK_CHI_HU) != 0 ) {
+
+			m_ChiHuRight[wCurrentUser] |= CHR_FEN_ZHANG;
+			m_cbChiHuCard = m_cbSendCardData;
+			m_cbProvideCard = m_cbSendCardData;
+
+			m_wProvideUser = INVALID_CHAIR;
+			OnEventGameConclude(wCurrentUser, NULL, GER_NORMAL);
+			return true;
+		}
+	}
+
 	//发送数据
 	m_pITableFrame->SendTableData(INVALID_CHAIR,SUB_S_SEND_CARD, &SendCard, sizeof(SendCard));
 	m_pITableFrame->SendLookonData(INVALID_CHAIR,SUB_S_SEND_CARD, &SendCard, sizeof(SendCard));
 
-	if(m_bTrustee[wCurrentUser])
-	{
-		m_bUserActionDone=true;
-		m_pITableFrame->SetGameTimer(IDI_OUT_CARD,1000,1,0);
+	if( m_cbLeftCardCount < FENZHANG_COUNT ){
+		m_pITableFrame->SetGameTimer(IDI_FENZHANG_DELAY, 3000, 1, NULL);
+	} else {
+		if(m_bTrustee[wCurrentUser])
+		{
+			m_bUserActionDone=true;
+			m_pITableFrame->SetGameTimer(IDI_OUT_CARD,1000,1,0);
+		}
 	}
+
 	return true;
 }
 
@@ -2437,6 +2470,13 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 					if(m_cbLeftCardCount > m_cbEndLeftCount && !m_bEnjoinGang[i]) 
 					{
 						m_wUserAction[i] |= m_GameLogic.EstimateGangCard(m_cbCardIndex[i], cbCenterCard);
+					}
+
+					if( m_wUserAction[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) ){
+						CChiHuRight chr;
+						BYTE cbWeaveCount = m_cbWeaveItemCount[i];
+						BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
+						m_wUserAction[i] |= cbAction;
 					}
 				}
 			}
@@ -2788,40 +2828,40 @@ bool CTableFrameSink::OnActionUserOffLine(WORD wChairID, IServerUserItem * pISer
 	return true;
 }
 
-bool CTableFrameSink::OnEventFenZhang()
-{
-	OutputDebugStringA("\n\t\t");OutputDebugStringA(__FUNCTION__);
-	WORD chiHuUserId = INVALID_CHAIR;
-	for( int i=0; i<GAME_PLAYER; i++){
-		WORD playerIndex = (m_wCurrentUser + i) % GAME_PLAYER;
-
-		BYTE cardData = GetSendCard();
-		m_dwChiHuKind[playerIndex] = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[playerIndex], m_WeaveItemArray[playerIndex],
-			m_cbWeaveItemCount[playerIndex], cardData, m_ChiHuRight[playerIndex]);
-
-		if( m_GameLogic.IsBaoPaiCard(cardData) && m_bTing[playerIndex] ){
-			m_dwChiHuKind[playerIndex] |= WIK_KIND_HU;			
-			m_ChiHuRight[playerIndex] |= CHR_JIN_BAO;
-		}
-
-		if( (m_dwChiHuKind[playerIndex]&WIK_KIND_HU) == WIK_KIND_HU){
-
-			chiHuUserId = playerIndex;
-			m_ChiHuRight[playerIndex] |= CHR_FEN_ZHANG;
-			m_cbCardIndex[playerIndex][m_GameLogic.SwitchToCardIndex(cardData)]++;
-			m_cbHandCardCount[playerIndex]++;
-
-			m_cbChiHuCard = cardData;
-			m_cbSendCardData = cardData;
-
-			m_cbProvideCard = cardData;
-			break;
-		}
-	}
-	m_wProvideUser = INVALID_CHAIR;
-	OnEventGameConclude(chiHuUserId, NULL, GER_NORMAL);
-	return true;
-}
+//bool CTableFrameSink::OnEventFenZhang()
+//{
+//	OutputDebugStringA("\n\t\t");OutputDebugStringA(__FUNCTION__);
+//	WORD chiHuUserId = INVALID_CHAIR;
+//	for( int i=0; i<GAME_PLAYER; i++){
+//		WORD playerIndex = (m_wCurrentUser + i) % GAME_PLAYER;
+//
+//		BYTE cardData = GetSendCard();
+//		m_dwChiHuKind[playerIndex] = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[playerIndex], m_WeaveItemArray[playerIndex],
+//			m_cbWeaveItemCount[playerIndex], cardData, m_ChiHuRight[playerIndex]);
+//
+//		if( m_GameLogic.IsBaoPaiCard(cardData) && m_bTing[playerIndex] ){
+//			m_dwChiHuKind[playerIndex] |= WIK_KIND_HU;			
+//			m_ChiHuRight[playerIndex] |= CHR_JIN_BAO;
+//		}
+//
+//		if( (m_dwChiHuKind[playerIndex]&WIK_KIND_HU) == WIK_KIND_HU){
+//
+//			chiHuUserId = playerIndex;
+//			m_ChiHuRight[playerIndex] |= CHR_FEN_ZHANG;
+//			m_cbCardIndex[playerIndex][m_GameLogic.SwitchToCardIndex(cardData)]++;
+//			m_cbHandCardCount[playerIndex]++;
+//
+//			m_cbChiHuCard = cardData;
+//			m_cbSendCardData = cardData;
+//
+//			m_cbProvideCard = cardData;
+//			break;
+//		}
+//	}
+//	m_wProvideUser = INVALID_CHAIR;
+//	OnEventGameConclude(chiHuUserId, NULL, GER_NORMAL);
+//	return true;
+//}
 
 bool CTableFrameSink::processQiangGangHu(BYTE cbGangStatus, WORD wUser, WORD wProvider){
 
@@ -2879,6 +2919,17 @@ bool CTableFrameSink::ExistInArray(BYTE cbStatus, BYTE cbArray[], WORD nCount){
 		}
 	}
 	return false;
+}
+
+WORD CTableFrameSink::NextUserID(WORD wCurrentID){
+	WORD nextId = (wCurrentID + 1) % m_cbPlayerCount;
+	for(int i=0;i<m_cbPlayerCount;i++)
+	{
+		if(m_bPlayStatus[nextId])
+			break;
+		nextId = (nextId+1)%m_cbPlayerCount;
+	}
+	return nextId;
 }
 
 //////////////////////////////////////////////////////////////////////////////////

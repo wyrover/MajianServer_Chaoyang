@@ -903,8 +903,16 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX],
 				ChiHuRight |= CHR_QING_YI_SE;
 			}
 
-			if( cbWeaveCount>=4 )
-				ChiHuRight |= CHR_SHOU_BA_YI;
+			if( cbWeaveCount>=4 ){
+				DWORD isShouBaYi = CHR_SHOU_BA_YI;
+				for( int i=0; i<cbWeaveCount; i++){
+					if( AnalyseItemArray[0].wWeaveKind[i] != WIK_PENG ){
+						isShouBaYi = 0;
+						break;
+					}
+				}
+				ChiHuRight |= isShouBaYi;
+			}
 			
 			if( IsShiSanLan(cbCardIndex, cbWeaveCount, ChiHuRight) ){
 				ChiHuRight |= CHR_SHI_SAN_YAO;
@@ -1040,27 +1048,7 @@ bool CGameLogic::isPossibleTing(const BYTE cbCardIndex[MAX_INDEX], const tagWeav
 		}
 	}
 
-	bool isContainYaoJiu = false;
-	for( int i=0; i<MAX_INDEX; i++){
-		if( cbCardIndex[i]>0 && isYaoJiuCard(SwitchToCardData(i))){
-			isContainYaoJiu = true;
-			break;
-		}
-	}
-
-	if( !isContainYaoJiu ) {
-		for(int i=0; i<cbWeaveCount; i++){
-			if( WeaveItem[i].wWeaveKind&(WIK_LEFT|WIK_CENTER|WIK_RIGHT) ){
-				for( int j=0; j<3; j++){
-					if( isYaoJiuCard(WeaveItem[i].cbCardData[j]) ) { isContainYaoJiu = true; break;}
-				}
-			} else {
-				if( isYaoJiuCard(WeaveItem[i].cbCenterCard) ) { isContainYaoJiu = true; break;}
-			}
-		}
-	}
-
-	return (isContainChiPeng && isContainYaoJiu);
+	return isContainChiPeng;
 }
 
 // Check Kaimen condition ¿ªÃÅ

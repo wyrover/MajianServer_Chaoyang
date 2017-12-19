@@ -279,11 +279,13 @@ protected:
 
 	BYTE GetRemainingCount(WORD wChairID,BYTE cbCardData);
 
-	bool OnEventFenZhang();
+	//bool OnEventFenZhang();
 
 	bool processQiangGangHu(BYTE cbGangStatus, WORD wUser, WORD wProvider);
 
 	bool ExistInArray(BYTE cbStatus, BYTE cbArray[], WORD nCount);
+
+	WORD NextUserID(WORD wCurrentID);
 };
 
 #endif
