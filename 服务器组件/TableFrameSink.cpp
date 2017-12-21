@@ -523,29 +523,31 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 			ZeroMemory(&GameConclude, sizeof(GameConclude));
 			GameConclude.cbSendCardData = m_cbSendCardData;
 
-			bool bFirstWinner = false;
 			WORD wWinner=INVALID_CHAIR;
 			BYTE cbBiMenStatus = 0;
-			//结束信息
-			for (WORD i = 0; i < m_cbPlayerCount; i++)
-			{
+			for (WORD i = 0; i < m_cbPlayerCount; i++) {
 				WORD k = wChairID==INVALID_CHAIR ? i: (i+wChairID)%m_cbPlayerCount;
-				//权位过滤
-				if(m_dwChiHuKind[k] == WIK_KIND_HU)
-				{
-					if( !bFirstWinner ){
-						bFirstWinner = true;
-						wWinner = k;
-						FiltrateRight(k, m_ChiHuRight[k]);
-						m_ChiHuRight[k].GetRightData(GameConclude.dwChiHuRight[k], MAX_RIGHT_COUNT);
-					} else {
-						m_dwChiHuKind[k] ^= WIK_KIND_HU;
-					}
+				
+				if(WIK_KIND_HU==m_dwChiHuKind[k]  && wWinner==INVALID_CHAIR)
+					wWinner = k;
+
+				else {
+					m_dwChiHuKind[k] ^= WIK_KIND_HU;
+					if( !m_GameLogic.isOpenedKaimen(m_WeaveItemArray[k], m_cbWeaveItemCount[k]))
+						cbBiMenStatus |= (1<<k);
 				}
+
 				GameConclude.dwChiHuKind[k] = m_dwChiHuKind[k];
 				GameConclude.cbCardCount[k] = m_GameLogic.SwitchToCardData(m_cbCardIndex[k], GameConclude.cbHandCardData[k]);
-				if( !m_GameLogic.isOpenedKaimen(m_WeaveItemArray[k], m_cbWeaveItemCount[k]) && k!=wWinner)
-					cbBiMenStatus |= 1<<k;
+			}
+
+			//结束信息
+			if( wWinner != INVALID_CHAIR ){
+				//权位过滤
+				if( (cbBiMenStatus & (0xFF^(1<<wWinner))) == 0)
+					m_ChiHuRight[wWinner] |= CHR_QI_YU;
+				FiltrateRight(wWinner, m_ChiHuRight[wWinner]);
+				m_ChiHuRight[wWinner].GetRightData(GameConclude.dwChiHuRight[wWinner], MAX_RIGHT_COUNT);
 			}
 
 			//计算胡牌输赢分
@@ -2753,7 +2755,7 @@ void CTableFrameSink::SetGameBaseScore(LONG lBaseScore)
 DWORD CTableFrameSink::GetTimes(WORD wChairId)
 {
 	DWORD wFanShu = 1;
-	DWORD wSpHuPaiKind[] = {CHR_ZHUANG_JIA, CHR_QING_YI_SE, CHR_GANG_SHANG_PAO, 
+	DWORD wSpHuPaiKind[] = {CHR_ZHUANG_JIA, CHR_QING_YI_SE, CHR_QI_YU, CHR_GANG_SHANG_PAO, 
 		CHR_GANG_SHANG_HUA, CHR_FEN_ZHANG, CHR_SHOU_BA_YI, CHR_JIA_HU, CHR_JIN_BAO};
 
 	if( wChairId == INVALID_CHAIR) return wFanShu;
@@ -2772,7 +2774,7 @@ DWORD CTableFrameSink::GetTimes(WORD wChairId)
 DWORD CTableFrameSink::GetTimesOfUser(WORD wUserId, WORD wWinnerId, bool isBiMen)
 {
 	DWORD wFanShu = 1;
-	DWORD wSpHuPaiKind[] = {CHR_ZHUANG_JIA, CHR_QING_YI_SE, CHR_GANG_SHANG_PAO, 
+	DWORD wSpHuPaiKind[] = {CHR_ZHUANG_JIA, CHR_QING_YI_SE, CHR_QI_YU, CHR_GANG_SHANG_PAO,
 		CHR_GANG_SHANG_HUA, CHR_FEN_ZHANG, CHR_SHOU_BA_YI, CHR_JIA_HU, CHR_JIN_BAO};
 
 	if( wWinnerId == INVALID_CHAIR) return wFanShu;
