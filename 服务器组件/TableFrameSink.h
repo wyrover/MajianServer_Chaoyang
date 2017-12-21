@@ -127,6 +127,7 @@ protected:
 
 	BYTE							m_nChaseArrowCount[GAME_PLAYER];
 	BYTE							m_cbChaseArrowArray[GAME_PLAYER][MAX_CHASE_COUNT];		//长毛杠数目
+	BYTE							m_cbChaseRemainCard[GAME_PLAYER][7];            // 长毛杠牌 【东南西北中发白】
 	//组合扑克
 protected:
 	BYTE							m_cbWeaveItemCount[GAME_PLAYER];				//组合数目
@@ -269,7 +270,7 @@ protected:
 	//算胡牌分
 	void CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYER], BYTE cbBiMenStatus);
 	//算杠分
-	void CalGangScore();
+	void CalcGangScore();
 	//权位过滤
 	void FiltrateRight(WORD wWinner, CChiHuRight &chr);
 	//计算倍数

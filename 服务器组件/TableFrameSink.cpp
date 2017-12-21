@@ -102,6 +102,7 @@ CTableFrameSink::CTableFrameSink()
 
 	ZeroMemory(m_nChaseArrowCount, sizeof(m_nChaseArrowCount));
 	ZeroMemory(m_cbChaseArrowArray, sizeof(m_cbChaseArrowArray));
+	ZeroMemory(m_cbChaseRemainCard, sizeof(m_cbChaseRemainCard));
 
 #ifdef  CARD_DISPATCHER_CONTROL
 	m_cbControlGameCount = 0;
@@ -208,6 +209,7 @@ VOID CTableFrameSink::RepositionSink()
 
 	ZeroMemory(m_nChaseArrowCount, sizeof(m_nChaseArrowCount));
 	ZeroMemory(m_cbChaseArrowArray, sizeof(m_cbChaseArrowArray));
+	ZeroMemory(m_cbChaseRemainCard, sizeof(m_cbChaseRemainCard));
 	return;
 }
 
@@ -1737,6 +1739,7 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				}
 				//设置变量
 				m_cbChaseArrowArray[wChairID][m_nChaseArrowCount[wChairID]++] = cbOperateCard[0];
+				m_cbChaseRemainCard[wChairID][cbOperateCard[0]-0x31]++;
 
 				//删除扑克
 				m_GameLogic.TakeOutCHMGang(m_cbCardIndex[wChairID],cbOperateCard[0]);
@@ -1788,6 +1791,7 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 				}
 				//设置变量
 				m_cbChaseArrowArray[wChairID][m_nChaseArrowCount[wChairID]++] = cbOperateCard[0];
+				m_cbChaseRemainCard[wChairID][cbOperateCard[0]-0x31]++;
 
 				//删除扑克
 				m_GameLogic.TakeOutCHMGang(m_cbCardIndex[wChairID],cbOperateCard[0]);
@@ -2287,7 +2291,7 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 	
 	if(bTail)//从尾部取牌，说明玩家杠牌了,计算分数
 	{
-		CalGangScore();
+		CalcGangScore();
 	}
 
 	//加牌
@@ -2587,7 +2591,7 @@ void CTableFrameSink::CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYE
 	}
 }
 
-void CTableFrameSink::CalGangScore()
+void CTableFrameSink::CalcGangScore()
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	SCORE lcell = m_pITableFrame->GetCellScore();
@@ -2643,66 +2647,98 @@ void CTableFrameSink::CalGangScore()
 			break;
 		case WIK_WND_GANG:
 			{
-				for(int i=0;i<GAME_PLAYER;i++)
-				{
-					if(!m_bPlayStatus[i])
-						continue;
-					if(i != m_wCurrentUser)
+				ASSERT(m_wCurrentUser!=INVALID_CHAIR);
+				if(m_wCurrentUser != INVALID_CHAIR){
+					for(int i=0;i<GAME_PLAYER;i++)
 					{
-						m_lUserGangScore[i] -= 2*lcell;
-						m_lUserGangScore[m_wCurrentUser] += 2*lcell;
+						if(!m_bPlayStatus[i])
+							continue;
+						if(i != m_wCurrentUser)
+						{
+							m_lUserGangScore[i] -= 2*lcell;
+							m_lUserGangScore[m_wCurrentUser] += 2*lcell;
+						}
 					}
+					//记录暗杠次数
+					m_stRecord.cbAnGang[m_wCurrentUser]++;
 				}
-				//记录暗杠次数
-				m_stRecord.cbAnGang[m_wCurrentUser]++;
 			}
 			break;
 		case WIK_ARW_GANG:
 			{
-				for(int i=0;i<GAME_PLAYER;i++)
-				{
-					if(!m_bPlayStatus[i])
-						continue;
-					if(i != m_wCurrentUser)
+				ASSERT(m_wCurrentUser!=INVALID_CHAIR);
+				if(m_wCurrentUser != INVALID_CHAIR){
+					for(int i=0;i<GAME_PLAYER;i++)
 					{
-						m_lUserGangScore[i] -= lcell;
-						m_lUserGangScore[m_wCurrentUser] += lcell;
+						if(!m_bPlayStatus[i])
+							continue;
+						if(i != m_wCurrentUser)
+						{
+							m_lUserGangScore[i] -= lcell;
+							m_lUserGangScore[m_wCurrentUser] += lcell;
+						}
 					}
+					//记录暗杠次数
+					m_stRecord.cbMingGang[m_wCurrentUser]++;
 				}
-				//记录暗杠次数
-				m_stRecord.cbMingGang[m_wCurrentUser]++;
 			}
 			break;
 		case WIK_CHASE_WND_GANG:
 			{
-				for(int i=0;i<GAME_PLAYER;i++)
-				{
-					if(!m_bPlayStatus[i])
-						continue;
-					if(i != m_wCurrentUser)
+				ASSERT(m_wCurrentUser!=INVALID_CHAIR);
+				if(m_wCurrentUser != INVALID_CHAIR){
+					if( m_cbChaseRemainCard[m_wCurrentUser][0]>0
+						&& m_cbChaseRemainCard[m_wCurrentUser][1]>0
+						&& m_cbChaseRemainCard[m_wCurrentUser][2]>0
+						&& m_cbChaseRemainCard[m_wCurrentUser][3]>0 )
 					{
-						m_lUserGangScore[i] -= 2*lcell;
-						m_lUserGangScore[m_wCurrentUser] += 2*lcell;
+						m_cbChaseRemainCard[m_wCurrentUser][0]--;
+						m_cbChaseRemainCard[m_wCurrentUser][1]--;
+						m_cbChaseRemainCard[m_wCurrentUser][2]--;
+						m_cbChaseRemainCard[m_wCurrentUser][3]--;
+
+						for(int i=0;i<GAME_PLAYER;i++)
+						{
+							if(!m_bPlayStatus[i])
+								continue;
+							if(i != m_wCurrentUser)
+							{
+								m_lUserGangScore[i] -= 2*lcell;
+								m_lUserGangScore[m_wCurrentUser] += 2*lcell;
+							}
+						}
+						//记录暗杠次数
+						m_stRecord.cbAnGang[m_wCurrentUser]++;
 					}
 				}
-				//记录暗杠次数
-				m_stRecord.cbAnGang[m_wCurrentUser]++;
 			}
 			break;
 		case WIK_CHASE_ARW_GANG:
 			{
-				for(int i=0;i<GAME_PLAYER;i++)
-				{
-					if(!m_bPlayStatus[i])
-						continue;
-					if(i != m_wCurrentUser)
+				ASSERT(m_wCurrentUser!=INVALID_CHAIR);
+				if(m_wCurrentUser != INVALID_CHAIR){
+					if( m_cbChaseRemainCard[m_wCurrentUser][4]>0
+						&& m_cbChaseRemainCard[m_wCurrentUser][5]>0
+						&& m_cbChaseRemainCard[m_wCurrentUser][6]>0 )
 					{
-						m_lUserGangScore[i] -= lcell;
-						m_lUserGangScore[m_wCurrentUser] += lcell;
+						m_cbChaseRemainCard[m_wCurrentUser][4]--;
+						m_cbChaseRemainCard[m_wCurrentUser][5]--;
+						m_cbChaseRemainCard[m_wCurrentUser][6]--;
+
+						for(int i=0;i<GAME_PLAYER;i++)
+						{
+							if(!m_bPlayStatus[i])
+								continue;
+							if(i != m_wCurrentUser)
+							{
+								m_lUserGangScore[i] -= lcell;
+								m_lUserGangScore[m_wCurrentUser] += lcell;
+							}
+						}
+						//记录暗杠次数
+						m_stRecord.cbMingGang[m_wCurrentUser]++;
 					}
 				}
-				//记录暗杠次数
-				m_stRecord.cbMingGang[m_wCurrentUser]++;
 			}
 			break;
 	}
