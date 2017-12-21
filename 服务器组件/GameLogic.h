@@ -318,7 +318,7 @@ private:
 	bool isPossibleHu(BYTE cbHuCard, const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount);
 	
 	bool CheckHuFormatStyle(const tagAnalyseItem *pAnalyseItem);
-	bool CheckJiaHuStyle(BYTE cbHuCard, const tagAnalyseItem *pAnalyseItem);
+	bool CheckJiaHuStyle(BYTE cbHuCard, const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount);
 	bool CheckYaoJiuFormat(const tagAnalyseItem *pAnalyseItem);
 	bool isYaoJiuCard(BYTE card);
 	bool isYaoJiuSubstitute(BYTE card);
