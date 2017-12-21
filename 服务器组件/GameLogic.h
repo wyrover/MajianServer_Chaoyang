@@ -79,7 +79,7 @@
 #define CHR_GANG_SHANG_HUA          0x00010000          //杠上花
 #define CHR_GANG_SHANG_PAO          0x00020000          //杠上炮
 #define CHR_QIANG_GANG_HU           0x00040000          //抢杠胡
-//#define CHR_QI_YU					0x00080000			//其余三家闭门
+#define CHR_QI_YU					0x00080000			//其余三家闭门
 #define CHR_CHI_HU					0x00100000			//放炮
 
 
@@ -312,12 +312,13 @@ public:
 private:
 	bool AddKindItem(tagKindItem &TempKindItem, tagKindItem KindItem[], BYTE &cbKindItemCount, bool &bMagicThree);
 	//分析扑克
-	bool AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveICount, CAnalyseItemArray & AnalyseItemArray);
+	bool AnalyseCard(BYTE cbCurrentCard, const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveICount, CAnalyseItemArray & AnalyseItemArray);
 
 	// If this Analyse Item is able to do Hu(胡) return ture. if not, return false
-	bool isPossibleHu(const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount);
-
+	bool isPossibleHu(BYTE cbHuCard, const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount);
+	
 	bool CheckHuFormatStyle(const tagAnalyseItem *pAnalyseItem);
+	bool CheckJiaHuStyle(BYTE cbHuCard, const tagAnalyseItem *pAnalyseItem);
 	bool CheckYaoJiuFormat(const tagAnalyseItem *pAnalyseItem);
 	bool isYaoJiuCard(BYTE card);
 	bool isYaoJiuSubstitute(BYTE card);
@@ -328,9 +329,11 @@ protected:
 	//碰碰和
 	bool IsPengPeng(const tagAnalyseItem *pAnalyseItem);
 	//麻七系列
-	bool IsMaQi(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChiHuRight &ChiHuRight);
+	bool IsMaQi(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount);
 	//十三烂系列
-	bool IsShiSanLan(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChiHuRight &ChiHuRight);
+	bool IsShiSanYao(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount);
+
+	bool IsShouBaYi(const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount);
 
 	bool IsJiaHuFormat(BYTE cbHuPai, const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount);
 	//平胡

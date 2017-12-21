@@ -871,16 +871,15 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX],
 	CopyMemory(cbCardIndexTemp,cbCardIndex,sizeof(cbCardIndexTemp));
 
 	//cbCurrentCard一定不为0			!!!!!!!!!
-	ASSERT(cbCurrentCard != 0);
-	if(cbCurrentCard == 0) return WIK_NULL;
+	ASSERT(cbCurrentCard != INVAILD_CARD_DATA);
+	if(cbCurrentCard == INVAILD_CARD_DATA) return WIK_NULL;
 
 	//插入扑克
-	if (cbCurrentCard!=0)
-		cbCardIndexTemp[SwitchToCardIndex(cbCurrentCard)]++;
+	cbCardIndexTemp[SwitchToCardIndex(cbCurrentCard)]++;
 
 		
 	//分析扑克
-	AnalyseCard(cbCardIndexTemp,WeaveItem,cbWeaveCount,AnalyseItemArray);
+	AnalyseCard(cbCurrentCard, cbCardIndexTemp,WeaveItem,cbWeaveCount,AnalyseItemArray);
 
 	//胡牌分析
 	if (AnalyseItemArray.GetCount()>0)
@@ -903,18 +902,11 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX],
 				ChiHuRight |= CHR_QING_YI_SE;
 			}
 
-			if( cbWeaveCount>=4 ){
-				DWORD isShouBaYi = CHR_SHOU_BA_YI;
-				for( int i=0; i<cbWeaveCount; i++){
-					if( AnalyseItemArray[0].wWeaveKind[i] != WIK_PENG ){
-						isShouBaYi = 0;
-						break;
-					}
-				}
-				ChiHuRight |= isShouBaYi;
+			if( IsShouBaYi(&AnalyseItemArray[0], cbWeaveCount) ){
+				ChiHuRight |= CHR_SHOU_BA_YI;
 			}
 			
-			if( IsShiSanLan(cbCardIndex, cbWeaveCount, ChiHuRight) ){
+			if( IsShiSanYao(cbCardIndex, cbWeaveCount) ){
 				ChiHuRight |= CHR_SHI_SAN_YAO;
 			}
 
@@ -1400,7 +1392,7 @@ bool CGameLogic::AddKindItem(tagKindItem &TempKindItem, tagKindItem KindItem[], 
 
 
 //分析扑克
-bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, CAnalyseItemArray & AnalyseItemArray)
+bool CGameLogic::AnalyseCard(BYTE cbCurrentCard, const BYTE cbCardIndex[MAX_INDEX], const tagWeaveItem WeaveItem[], BYTE cbWeaveCount, CAnalyseItemArray & AnalyseItemArray)
 {
 	//计算数目
 	BYTE cbCardCount=GetCardCount(cbCardIndex);
@@ -1450,7 +1442,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 				else AnalyseItem.bMagicEye = false;
 				AnalyseItem.cbCardEye=cbCardIndex[i]==0?SwitchToCardData(cbCardIndex[m_cbMagicIndex]):SwitchToCardData(i);
 
-				if( isPossibleHu(&AnalyseItem, cbWeaveCount) ) {
+				if( isPossibleHu(cbCurrentCard, &AnalyseItem, cbWeaveCount) ) {
 					//插入结果
 					AnalyseItemArray.Add(AnalyseItem);
 
@@ -1714,7 +1706,7 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 						AnalyseItem.cbCardEye=cbCardEye;
 						AnalyseItem.bMagicEye = bMagicEye;
 
-						if( isPossibleHu(&AnalyseItem, cbWeaveCount) ) {
+						if( isPossibleHu(cbCurrentCard, &AnalyseItem, cbWeaveCount) ) {
 							//插入结果
 							AnalyseItemArray.Add(AnalyseItem);
 						}
@@ -1750,11 +1742,15 @@ bool CGameLogic::AnalyseCard(const BYTE cbCardIndex[MAX_INDEX], const tagWeaveIt
 	return (AnalyseItemArray.GetCount()>0);
 }
 
-bool CGameLogic::isPossibleHu(const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount) {
+bool CGameLogic::isPossibleHu(BYTE cbHuCard, const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount) {
 	if( !CheckHuFormatStyle(pAnalyseItem) ) return false;
 
 	if( !CheckYaoJiuFormat(pAnalyseItem)) return false;
 
+	if( m_CustomRule.bEnabled_JiaHu ){
+		if( !CheckJiaHuStyle(cbHuCard, pAnalyseItem, cbWeaveCount) )
+			return false;
+	}
 	return true;
 }
 
@@ -1853,6 +1849,14 @@ bool CGameLogic::CheckHuFormatStyle(const tagAnalyseItem *pAnalyseItem){
 
 	return false;
 }
+
+bool CGameLogic::CheckJiaHuStyle(BYTE cbHuCard, const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount){
+	if( !IsShouBaYi(pAnalyseItem, cbWeaveCount) ) return false;
+	if( !IsJiaHuFormat(cbHuCard, pAnalyseItem, cbWeaveCount)) return false;
+
+	return true;
+}
+
 /*
 // 胡法分析函数
 */
@@ -1869,7 +1873,7 @@ bool CGameLogic::IsPengPeng(const tagAnalyseItem *pAnalyseItem)
 }
 
 //是否麻七系列
-bool CGameLogic::IsMaQi(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChiHuRight &ChiHuRight)
+bool CGameLogic::IsMaQi(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount)
 {
 	if(cbWeaveCount!=0)
 		return false;
@@ -1900,7 +1904,7 @@ bool CGameLogic::IsMaQi(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChi
 	return false;
 }
 //十三烂系列
-bool CGameLogic::IsShiSanLan(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount,CChiHuRight &ChiHuRight)
+bool CGameLogic::IsShiSanYao(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount)
 {
 	//组合判断
 	if (cbWeaveCount!=0) return false;
@@ -1924,12 +1928,23 @@ bool CGameLogic::IsShiSanLan(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount
 		}
 	}
 
-	//所有风牌都有, 十三烂
-	ChiHuRight |= CHR_SHI_SAN_YAO;
 	return true;
 }
 
-//鸡胡
+//手把一
+bool CGameLogic::IsShouBaYi(const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount)
+{
+	if( nWeaveCount < 4 ) return false;
+
+	for( int i=0; i<nWeaveCount; i++){
+		if( pAnalyseItem->wWeaveKind[i] != WIK_PENG ){
+			return false;
+		}
+	}
+	return true;
+}
+
+//夹胡
 bool CGameLogic::IsJiaHuFormat(BYTE cbHuPai, const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount)
 {
 	for(BYTE i = nWeaveCount; i < MAX_WEAVE; i++)
