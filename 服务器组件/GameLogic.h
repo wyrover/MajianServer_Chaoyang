@@ -333,7 +333,7 @@ protected:
 	//十三烂系列
 	bool IsShiSanYao(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount);
 
-	bool IsShouBaYi(const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount);
+	bool IsShouBaYi(BYTE cbHuPai, const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount);
 
 	bool IsJiaHuFormat(BYTE cbHuPai, const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount);
 	//平胡

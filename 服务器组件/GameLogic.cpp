@@ -902,7 +902,7 @@ BYTE CGameLogic::AnalyseChiHuCard(const BYTE cbCardIndex[MAX_INDEX],
 				ChiHuRight |= CHR_QING_YI_SE;
 			}
 
-			if( IsShouBaYi(&AnalyseItemArray[0], cbWeaveCount) ){
+			if( IsShouBaYi(cbCurrentCard, &AnalyseItemArray[0], cbWeaveCount) ){
 				ChiHuRight |= CHR_SHOU_BA_YI;
 			}
 			
@@ -1851,10 +1851,10 @@ bool CGameLogic::CheckHuFormatStyle(const tagAnalyseItem *pAnalyseItem){
 }
 
 bool CGameLogic::CheckJiaHuStyle(BYTE cbHuCard, const tagAnalyseItem *pAnalyseItem, BYTE cbWeaveCount){
-	if( !IsShouBaYi(pAnalyseItem, cbWeaveCount) ) return false;
-	if( !IsJiaHuFormat(cbHuCard, pAnalyseItem, cbWeaveCount)) return false;
+	if( IsShouBaYi(cbHuCard, pAnalyseItem, cbWeaveCount) ) return true;
+	if( IsJiaHuFormat(cbHuCard, pAnalyseItem, cbWeaveCount)) return true;
 
-	return true;
+	return false;
 }
 
 /*
@@ -1932,7 +1932,7 @@ bool CGameLogic::IsShiSanYao(const BYTE cbCardIndex[MAX_INDEX],BYTE cbWeaveCount
 }
 
 // ÷∞—“ª
-bool CGameLogic::IsShouBaYi(const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount)
+bool CGameLogic::IsShouBaYi(BYTE cbHuPai, const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount)
 {
 	if( nWeaveCount < 4 ) return false;
 
@@ -1941,6 +1941,7 @@ bool CGameLogic::IsShouBaYi(const tagAnalyseItem *pAnalyseItem, BYTE nWeaveCount
 			return false;
 		}
 	}
+
 	return true;
 }
 

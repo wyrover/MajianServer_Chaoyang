@@ -546,7 +546,7 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 			//结束信息
 			if( wWinner != INVALID_CHAIR ){
 				//权位过滤
-				BYTE mask = (0xFF^(1<<wWinner));
+				BYTE mask = (0xF^(1<<wWinner));
 				if( (cbBiMenStatus & mask) == mask)
 					m_ChiHuRight[wWinner] |= CHR_QI_YU;
 				FiltrateRight(wWinner, m_ChiHuRight[wWinner]);
