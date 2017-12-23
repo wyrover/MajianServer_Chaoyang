@@ -270,7 +270,7 @@ protected:
 	//算胡牌分
 	void CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYER], BYTE cbBiMenStatus);
 	//算杠分
-	void CalcGangScore();
+	void CalcGangScore(BYTE cbStatus);
 	//权位过滤
 	void FiltrateRight(WORD wWinner, CChiHuRight &chr);
 	//计算倍数

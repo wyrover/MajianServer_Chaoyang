@@ -985,6 +985,7 @@ BYTE CGameLogic::AnalyseTingCard(const BYTE cbCardIndex[MAX_INDEX], const tagWea
 		for(BYTE i = 0; i < MAX_INDEX-MAX_HUA_INDEX; i++)
 		{
 			if(cbCardIndexTemp[i] == 0) continue;
+			if(cbCardIndexTemp[i] == m_cbMagicIndex) continue;
 			cbCardIndexTemp[i]--;
 
 			bool bAdd=false;
