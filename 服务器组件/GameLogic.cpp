@@ -1095,8 +1095,8 @@ BYTE CGameLogic::GetRandHuiPaiCardIndex( )
 BYTE CGameLogic::SwitchToCardData(BYTE cbCardIndex)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
-	//ASSERT(cbCardIndex<MAX_INDEX);
-	if( cbCardIndex>=MAX_INDEX ) return INVAILD_CARD_DATA;
+	ASSERT(cbCardIndex<MAX_INDEX);
+	//if( cbCardIndex>=MAX_INDEX ) return INVAILD_CARD_DATA;
 
 	if(cbCardIndex < 27)
 		return ((cbCardIndex/9)<<4)|(cbCardIndex%9+1);
@@ -1107,8 +1107,8 @@ BYTE CGameLogic::SwitchToCardData(BYTE cbCardIndex)
 BYTE CGameLogic::SwitchToCardIndex(BYTE cbCardData)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
-	//ASSERT(IsValidCard(cbCardData));
-	if( !IsValidCard(cbCardData) ) return INVAILD_CARD_INDEX;
+	ASSERT(IsValidCard(cbCardData));
+	//if( !IsValidCard(cbCardData) ) return INVAILD_CARD_INDEX;
 
 	return ((cbCardData & MASK_COLOR) >> 4) * 9 + (cbCardData & MASK_VALUE) - 1;
 }
