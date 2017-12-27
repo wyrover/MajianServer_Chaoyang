@@ -720,6 +720,41 @@ BYTE CGameLogic::EstimateEatCard(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCurre
 	return cbEatKind;
 }
 
+//
+bool CGameLogic::isPossiblePeng(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount)
+{
+	if( !m_CustomRule.bEnabled_JiaHu ) return true;
+
+	if( cbWeaveCount < (MAX_INDEX-1) ) return true;
+
+	for( int i=0; i<cbWeaveCount; i++){
+		if( arrWeavItem[i].wWeaveKind != WIK_PENG )
+			return false;
+	}
+
+	return true;
+}
+
+//
+bool CGameLogic::isPossibleChi(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount)
+{
+	if( !m_CustomRule.bEnabled_JiaHu ) return true;
+
+	if( cbWeaveCount < (MAX_INDEX-1) ) return true;
+
+	return false;
+}
+
+//
+bool CGameLogic::isPossibleGang(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount)
+{
+	if( !m_CustomRule.bEnabled_JiaHu ) return true;
+
+	if( cbWeaveCount < (MAX_INDEX-1) ) return true;
+
+	return false;
+}
+
 //ÅöÅÆÅÐ¶Ï
 BYTE CGameLogic::EstimatePengCard(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCurrentCard)
 {

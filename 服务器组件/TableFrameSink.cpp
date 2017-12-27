@@ -1234,35 +1234,35 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
  		if(m_wUserAction[wChairID] == WIK_NULL) return true;
  		if ((wOperateCode!=WIK_NULL) && ((m_wUserAction[wChairID]&wOperateCode) == 0)) return true;
  
- 		//变量定义
- 		WORD wTargetUser = wChairID;
- 		WORD wTargetAction = wOperateCode;
- 
  		//设置变量
-		m_bEnjoinGang[wTargetUser] = false;
- 		m_bResponse[wTargetUser] = true;
- 		m_wPerformAction[wTargetUser] = wOperateCode;
- 		if(cbOperateCard[0] == 0)
+		m_bEnjoinGang[wChairID] = false;
+ 		m_bResponse[wChairID] = true;
+ 		m_wPerformAction[wChairID] = wOperateCode;
+ 		if(cbOperateCard[0] == INVAILD_CARD_DATA)
 		{
-			m_cbOperateCard[wTargetUser][0] = m_cbProvideCard;
+			m_cbOperateCard[wChairID][0] = m_cbProvideCard;
 		}
  		else 
 		{
-			CopyMemory(m_cbOperateCard[wTargetUser], cbOperateCard, sizeof(m_cbOperateCard[wTargetUser]));
+			CopyMemory(m_cbOperateCard[wChairID], cbOperateCard, sizeof(m_cbOperateCard[wChairID]));
+		}
+
+		//变量定义
+		WORD wTargetUser = GetBestActionPerformedUser(m_wProvideUser);
+		WORD wTargetAction = m_wPerformAction[wTargetUser];
+
+		if( SendOperateNotifyWithRank(m_wProvideUser, wTargetAction) != INVALID_CHAIR ) {
+			return true;
 		}
 
 		if (wTargetAction == WIK_NULL){
-			//放弃操作
-			if( !SendOperateNotifyWithRank() ) {
-				//用户状态
-				ZeroMemory(m_bResponse, sizeof(m_bResponse));
-				ZeroMemory(m_wUserAction, sizeof(m_wUserAction));
-				ZeroMemory(m_cbOperateCard, sizeof(m_cbOperateCard));
-				ZeroMemory(m_wPerformAction, sizeof(m_wPerformAction));
+			//用户状态
+			ZeroMemory(m_bResponse, sizeof(m_bResponse));
+			ZeroMemory(m_wUserAction, sizeof(m_wUserAction));
+			ZeroMemory(m_cbOperateCard, sizeof(m_cbOperateCard));
+			ZeroMemory(m_wPerformAction, sizeof(m_wPerformAction));
 
-				DispatchCardData(m_wResumeUser,m_cbGangStatus != WIK_GANERAL);
-			}
-			
+			DispatchCardData(m_wResumeUser,m_cbGangStatus != WIK_GANERAL);
 			return true;
 		}
  
@@ -2053,37 +2053,73 @@ bool CTableFrameSink::SendOperateNotify()
 	return true;
 }
 
-//Send the Operate Notificatoin for Best rank users
-bool CTableFrameSink::SendOperateNotifyWithRank()
+
+WORD CTableFrameSink::GetBestActionPerformedUser(WORD cbProvider)
 {
-	int bestRank = -1;
+	WORD wBestUser = INVALID_CHAIR;
+	WORD wBestAction = WIK_NULL;
+	//执行判断
+	for (WORD i = 0; i < m_cbPlayerCount; i++)
+	{
+		WORD k = (i+cbProvider+1)%GAME_PLAYER;
+		if( k == cbProvider ) continue;
+
+		if( m_bResponse[k] ){
+			//获取动作
+			WORD wUserAction = m_wPerformAction[k];
+
+			//优先级别
+			BYTE cbUserActionRank = m_GameLogic.GetUserActionRank(wUserAction);
+			BYTE cbTargetActionRank = m_GameLogic.GetUserActionRank(wBestAction);
+
+			//动作判断
+			if (cbUserActionRank > cbTargetActionRank) {
+				wBestUser = k;
+				wBestAction = wUserAction;
+			}
+		}
+	}
+	return wBestUser;
+}
+
+//Send the Operate Notificatoin for Best rank users
+WORD CTableFrameSink::SendOperateNotifyWithRank(WORD cbProvider, WORD cbTargetAction)
+{
+	int bestRank = m_GameLogic.GetUserActionRank(cbTargetAction);
 	WORD wBestUser = INVALID_CHAIR;
 	//发送提示
 	for (WORD i=0;i<m_cbPlayerCount;i++)
 	{
-		WORD userIndex = (i+m_wProvideUser+1)%GAME_PLAYER;
-		if( m_wUserAction[userIndex] != WIK_NULL && !m_bResponse[userIndex] )
-		{
-			int rank = m_GameLogic.GetUserActionRank(m_wUserAction[userIndex]);
-			if( rank > bestRank ){
-				bestRank = rank;
-				wBestUser = userIndex;
-			}
+		WORD userIndex = (i+cbProvider+1)%GAME_PLAYER;
+		if( userIndex == cbProvider ) continue;
+
+		BYTE cbAction = m_bResponse[userIndex] ? m_wPerformAction[userIndex] : m_wUserAction[userIndex];
+		int rank = m_GameLogic.GetUserActionRank(cbAction);
+		if( rank > bestRank ){
+			bestRank = rank;
+			wBestUser = userIndex;
+		} else if( rank == bestRank && wBestUser == INVALID_CHAIR){
+			wBestUser = userIndex;
 		}
 	}
 
-	if( wBestUser == INVALID_CHAIR ) return false;
+	ASSERT(wBestUser!=INVALID_CHAIR);
+	if( wBestUser == INVALID_CHAIR) return INVALID_CHAIR;
 
-	//构造数据
-	CMD_S_OperateNotify OperateNotify;
-	OperateNotify.cbActionCard=m_cbProvideCard;
-	OperateNotify.wActionMask=m_wUserAction[wBestUser];
+	if( !m_bResponse[wBestUser] ){
+		//构造数据
+		CMD_S_OperateNotify OperateNotify;
+		OperateNotify.cbActionCard=m_cbProvideCard;
+		OperateNotify.wActionMask=m_wUserAction[wBestUser];
 
-	//发送数据
-	m_pITableFrame->SendTableData(wBestUser,SUB_S_OPERATE_NOTIFY,&OperateNotify,sizeof(OperateNotify));
-	m_pITableFrame->SendLookonData(wBestUser,SUB_S_OPERATE_NOTIFY,&OperateNotify,sizeof(OperateNotify));
+		//发送数据
+		m_pITableFrame->SendTableData(wBestUser,SUB_S_OPERATE_NOTIFY,&OperateNotify,sizeof(OperateNotify));
+		m_pITableFrame->SendLookonData(wBestUser,SUB_S_OPERATE_NOTIFY,&OperateNotify,sizeof(OperateNotify));
 
-	return true;
+		return wBestUser;
+	}
+
+	return INVALID_CHAIR;
 }
 
 
@@ -2330,9 +2366,13 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 		//杠牌判断
 		if ((!m_bEnjoinGang[wCurrentUser]) && (m_cbLeftCardCount > m_cbEndLeftCount) && !m_bTing[wCurrentUser])
 		{
-			tagGangCardResult GangCardResult;
-			m_wUserAction[wCurrentUser] |= m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wCurrentUser],
-				m_WeaveItemArray[wCurrentUser], m_cbWeaveItemCount[wCurrentUser],m_cbSendCardData ,GangCardResult, m_cbOutFromHandCount[wCurrentUser]);
+			BYTE cbWeaveCount = m_cbWeaveItemCount[wCurrentUser];
+
+			if( m_GameLogic.isPossibleGang(m_WeaveItemArray[wCurrentUser], cbWeaveCount) ){
+				tagGangCardResult GangCardResult;
+				m_wUserAction[wCurrentUser] |= m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wCurrentUser],
+					m_WeaveItemArray[wCurrentUser], m_cbWeaveItemCount[wCurrentUser],m_cbSendCardData ,GangCardResult, m_cbOutFromHandCount[wCurrentUser]);
+			}
 		}
 	}
 
@@ -2433,7 +2473,7 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 			BYTE cbWeaveCount = m_cbWeaveItemCount[i];
 			BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
 			m_wUserAction[i] = cbAction;
-			if( !m_bTing[i] )
+			if( !m_bTing[i] ) {
 				//吃碰判断
 				if(!m_bEnjoinChiPeng[i])
 				{
@@ -2447,19 +2487,26 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 					}
 					if(bPeng)
 					{
-						//碰牌判断
-						m_wUserAction[i] |= m_GameLogic.EstimatePengCard(m_cbCardIndex[i], cbCenterCard);
+						if( m_GameLogic.isPossiblePeng(m_WeaveItemArray[i], cbWeaveCount) ){
+							//碰牌判断
+							m_wUserAction[i] |= m_GameLogic.EstimatePengCard(m_cbCardIndex[i], cbCenterCard);
+						}
 					}
 
 					//吃牌判断
 					WORD wEatUser=(wCenterUser+1)%m_wPlayerCount;
-					if (wEatUser==i)
-						m_wUserAction[i] |= m_GameLogic.EstimateEatCard(m_cbCardIndex[i],cbCenterCard);
+					if (wEatUser==i){
+						if( m_GameLogic.isPossibleChi(m_WeaveItemArray[i], cbWeaveCount) ){
+							m_wUserAction[i] |= m_GameLogic.EstimateEatCard(m_cbCardIndex[i],cbCenterCard);
+						}
+					}
 
 					//杠牌判断
 					if(m_cbLeftCardCount > m_cbEndLeftCount && !m_bEnjoinGang[i]) 
 					{
-						m_wUserAction[i] |= m_GameLogic.EstimateGangCard(m_cbCardIndex[i], cbCenterCard);
+						if( m_GameLogic.isPossibleGang(m_WeaveItemArray[i], cbWeaveCount) ){
+							m_wUserAction[i] |= m_GameLogic.EstimateGangCard(m_cbCardIndex[i], cbCenterCard);
+						}
 					}
 
 					//if( m_wUserAction[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) ){
@@ -2513,7 +2560,7 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 		m_wCurrentUser = INVALID_CHAIR;
 
 		//发送提示
-		SendOperateNotifyWithRank();
+		SendOperateNotifyWithRank(m_wProvideUser, WIK_NULL);
 
 		return true;
 	}

@@ -251,7 +251,9 @@ protected:
 	//·¢ËÍ²Ù×÷
 	bool SendOperateNotify();
 
-	bool SendOperateNotifyWithRank();
+	WORD SendOperateNotifyWithRank(WORD cbProvider, WORD cbTargetAction);
+
+	WORD GetBestActionPerformedUser(WORD cbProvider);
 
 	BYTE CreateNewBaopaiIndex();
 
