@@ -555,7 +555,7 @@ bool CTableFrameSink::OnEventGameConclude(WORD wChairID, IServerUserItem * pISer
 
 			//计算胡牌输赢分
 			SCORE lUserGameScore[GAME_PLAYER]={0};
-			CalHuPaiScore(wWinner, lUserGameScore, cbBiMenStatus);
+			CalcHuPaiScore(wWinner, lUserGameScore, cbBiMenStatus);
 
 			//积分变量
 			tagScoreInfo ScoreInfoArray[GAME_PLAYER];
@@ -2527,7 +2527,7 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 }
 
 //算分
-void CTableFrameSink::CalHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYER], BYTE cbBiMenStatus)
+void CTableFrameSink::CalcHuPaiScore(WORD wWinnder, LONGLONG lEndScore[GAME_PLAYER], BYTE cbBiMenStatus)
 {
 	//OutputDebugStringA("\n");OutputDebugStringA(__FUNCTION__);
 	//初始化
