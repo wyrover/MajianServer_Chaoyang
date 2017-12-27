@@ -2083,9 +2083,9 @@ WORD CTableFrameSink::GetBestActionPerformedUser(WORD cbProvider)
 }
 
 //Send the Operate Notificatoin for Best rank users
-WORD CTableFrameSink::SendOperateNotifyWithRank(WORD cbProvider, WORD cbTargetAction)
+WORD CTableFrameSink::SendOperateNotifyWithRank(WORD cbProvider, WORD wTargetAction)
 {
-	int bestRank = m_GameLogic.GetUserActionRank(cbTargetAction);
+	int bestRank = m_GameLogic.GetUserActionRank(wTargetAction);
 	WORD wBestUser = INVALID_CHAIR;
 	//∑¢ÀÕÃ· æ
 	for (WORD i=0;i<m_cbPlayerCount;i++)
@@ -2093,8 +2093,8 @@ WORD CTableFrameSink::SendOperateNotifyWithRank(WORD cbProvider, WORD cbTargetAc
 		WORD userIndex = (i+cbProvider+1)%GAME_PLAYER;
 		if( userIndex == cbProvider ) continue;
 
-		BYTE cbAction = m_bResponse[userIndex] ? m_wPerformAction[userIndex] : m_wUserAction[userIndex];
-		int rank = m_GameLogic.GetUserActionRank(cbAction);
+		WORD wAction = m_bResponse[userIndex] ? m_wPerformAction[userIndex] : m_wUserAction[userIndex];
+		int rank = m_GameLogic.GetUserActionRank(wAction);
 		if( rank > bestRank ){
 			bestRank = rank;
 			wBestUser = userIndex;
@@ -2367,12 +2367,11 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 		if ((!m_bEnjoinGang[wCurrentUser]) && (m_cbLeftCardCount > m_cbEndLeftCount) && !m_bTing[wCurrentUser])
 		{
 			BYTE cbWeaveCount = m_cbWeaveItemCount[wCurrentUser];
+			tagGangCardResult GangCardResult;
+			WORD action = m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wCurrentUser],
+				m_WeaveItemArray[wCurrentUser], m_cbWeaveItemCount[wCurrentUser],m_cbSendCardData ,GangCardResult, m_cbOutFromHandCount[wCurrentUser]);
 
-			if( m_GameLogic.isPossibleGang(m_WeaveItemArray[wCurrentUser], cbWeaveCount) ){
-				tagGangCardResult GangCardResult;
-				m_wUserAction[wCurrentUser] |= m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wCurrentUser],
-					m_WeaveItemArray[wCurrentUser], m_cbWeaveItemCount[wCurrentUser],m_cbSendCardData ,GangCardResult, m_cbOutFromHandCount[wCurrentUser]);
-			}
+			m_wUserAction[wCurrentUser] |= m_GameLogic.possibleAction(m_WeaveItemArray[wCurrentUser], cbWeaveCount, action);
 		}
 	}
 
@@ -2487,34 +2486,27 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 					}
 					if(bPeng)
 					{
-						if( m_GameLogic.isPossiblePeng(m_WeaveItemArray[i], cbWeaveCount) ){
-							//≈ˆ≈∆≈–∂œ
-							m_wUserAction[i] |= m_GameLogic.EstimatePengCard(m_cbCardIndex[i], cbCenterCard);
-						}
+						//≈ˆ≈∆≈–∂œ
+						WORD action = m_GameLogic.EstimatePengCard(m_cbCardIndex[i], cbCenterCard);
+
+						m_wUserAction[i] |= m_GameLogic.possibleAction(m_WeaveItemArray[i], cbWeaveCount, action);
 					}
 
 					//≥‘≈∆≈–∂œ
 					WORD wEatUser=(wCenterUser+1)%m_wPlayerCount;
 					if (wEatUser==i){
-						if( m_GameLogic.isPossibleChi(m_WeaveItemArray[i], cbWeaveCount) ){
-							m_wUserAction[i] |= m_GameLogic.EstimateEatCard(m_cbCardIndex[i],cbCenterCard);
-						}
+						WORD action = m_GameLogic.EstimateEatCard(m_cbCardIndex[i],cbCenterCard);
+
+						m_wUserAction[i] |= m_GameLogic.possibleAction(m_WeaveItemArray[i], cbWeaveCount, action);
 					}
 
 					//∏‹≈∆≈–∂œ
 					if(m_cbLeftCardCount > m_cbEndLeftCount && !m_bEnjoinGang[i]) 
 					{
-						if( m_GameLogic.isPossibleGang(m_WeaveItemArray[i], cbWeaveCount) ){
-							m_wUserAction[i] |= m_GameLogic.EstimateGangCard(m_cbCardIndex[i], cbCenterCard);
-						}
-					}
+						WORD action = m_GameLogic.EstimateGangCard(m_cbCardIndex[i], cbCenterCard);
 
-					//if( m_wUserAction[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) ){
-					//	CChiHuRight chr;
-					//	BYTE cbWeaveCount = m_cbWeaveItemCount[i];
-					//	BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
-					//	m_wUserAction[i] |= cbAction;
-					//}
+						m_wUserAction[i] |= m_GameLogic.possibleAction(m_WeaveItemArray[i], cbWeaveCount, action);
+					}
 				}
 			}
 		}

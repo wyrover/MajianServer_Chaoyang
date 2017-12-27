@@ -259,9 +259,7 @@ public:
 
 	//¶¯×÷ÅÐ¶Ï
 public:
-	bool isPossiblePeng(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount);
-	bool isPossibleChi(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount);
-	bool isPossibleGang(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount);
+	WORD possibleAction(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount, WORD wAction);
 
 	//³ÔÅÆÅÐ¶Ï
 	BYTE EstimateEatCard(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCurrentCard);

@@ -251,7 +251,7 @@ protected:
 	//·¢ËÍ²Ù×÷
 	bool SendOperateNotify();
 
-	WORD SendOperateNotifyWithRank(WORD cbProvider, WORD cbTargetAction);
+	WORD SendOperateNotifyWithRank(WORD cbProvider, WORD wTargetAction);
 
 	WORD GetBestActionPerformedUser(WORD cbProvider);
 

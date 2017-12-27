@@ -720,39 +720,51 @@ BYTE CGameLogic::EstimateEatCard(const BYTE cbCardIndex[MAX_INDEX], BYTE cbCurre
 	return cbEatKind;
 }
 
-//
-bool CGameLogic::isPossiblePeng(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount)
+//for the  ÷∞—“ª
+WORD CGameLogic::possibleAction(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount, WORD wAction)
 {
-	if( !m_CustomRule.bEnabled_JiaHu ) return true;
+	if( !m_CustomRule.bEnabled_JiaHu ) return wAction;
 
-	if( cbWeaveCount < (MAX_INDEX-1) ) return true;
+	if( cbWeaveCount < (MAX_INDEX-1) ) return wAction;
 
-	for( int i=0; i<cbWeaveCount; i++){
-		if( arrWeavItem[i].wWeaveKind != WIK_PENG )
-			return false;
+	if( wAction&WIK_PENG ){
+		for( int i=0; i<cbWeaveCount; i++){
+			if( arrWeavItem[i].wWeaveKind != WIK_PENG ){
+				wAction ^= WIK_PENG;
+				break;
+			}
+		}
 	}
 
-	return true;
-}
+	if( wAction&WIK_LEFT)
+		wAction ^= WIK_LEFT;
+	if( wAction&WIK_CENTER)
+		wAction ^= WIK_CENTER;
+	if( wAction&WIK_RIGHT)
+		wAction ^= WIK_RIGHT;
 
-//
-bool CGameLogic::isPossibleChi(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount)
-{
-	if( !m_CustomRule.bEnabled_JiaHu ) return true;
+	if( wAction&WIK_GANG )
+		wAction ^= WIK_GANG;
 
-	if( cbWeaveCount < (MAX_INDEX-1) ) return true;
+	if( wAction&WIK_ARROW )
+		wAction ^= WIK_ARROW;
+	if( wAction&WIK_WIND )
+		wAction ^= WIK_WIND;
+	
+	
+	/* // no need
+	if( wAction&WIK_CHASEARROW )
+	{
+		if( cbWeaveCount == MAX_INDEX )
+			wAction ^= WIK_CHASEARROW;
+	}
+	if( wAction&WIK_CHASEWIND )
+	{
+		if( cbWeaveCount == MAX_INDEX )
+			wAction ^= WIK_CHASEWIND;
+	}*/
 
-	return false;
-}
-
-//
-bool CGameLogic::isPossibleGang(const tagWeaveItem arrWeavItem[MAX_INDEX], BYTE cbWeaveCount)
-{
-	if( !m_CustomRule.bEnabled_JiaHu ) return true;
-
-	if( cbWeaveCount < (MAX_INDEX-1) ) return true;
-
-	return false;
+	return wAction;
 }
 
 //≈ˆ≈∆≈–∂œ
