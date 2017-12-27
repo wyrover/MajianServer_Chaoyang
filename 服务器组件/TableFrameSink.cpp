@@ -2145,7 +2145,8 @@ BYTE CTableFrameSink::CreateNewBaopaiIndex()
 {
 	if( m_tGameCustomRule.bEnabled_BaoPai ){
 		BYTE magicCard = m_cbMagicIndex<MAX_INDEX ? m_GameLogic.SwitchToCardData(m_cbMagicIndex) : INVAILD_CARD_DATA;
-		for(int i=m_cbMinusLastCount; i<CountArray(m_cbRepertoryCard); i++){
+		int i;
+		for(i=m_cbMinusLastCount; i<CountArray(m_cbRepertoryCard); i++){
 			if( magicCard != m_cbRepertoryCard[i] ) break;            
 		}
 		if( i != m_cbMinusLastCount){

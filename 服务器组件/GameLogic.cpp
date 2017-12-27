@@ -1765,7 +1765,8 @@ bool CGameLogic::AnalyseCard(BYTE cbCurrentCard, const BYTE cbCardIndex[MAX_INDE
 			//ÉèÖÃË÷Òý
 			if (cbIndex[cbLessKindItem-1]==(cbKindItemCount-1))
 			{
-				for (BYTE i=cbLessKindItem-1;i>0;i--)
+				BYTE i;
+				for (i=cbLessKindItem-1;i>0;i--)
 				{
 					if ((cbIndex[i-1]+1)!=cbIndex[i])
 					{

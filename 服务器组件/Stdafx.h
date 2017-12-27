@@ -6,13 +6,33 @@
 #define VC_EXTRALEAN
 #endif
 
+#if _MSC_VER>=1600
+
+#ifndef WINVER
+#define WINVER 0x0501
+#endif
+
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif						
+
+#ifndef _WIN32_WINDOWS
+#define _WIN32_WINDOWS 0x0501
+#endif
+
+#ifndef _WIN32_IE
+#define _WIN32_IE 0x0601
+#endif
+
+#else  
+
 #ifndef WINVER
 #define WINVER 0x0500
 #endif
 
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0400
-#endif
+#endif						
 
 #ifndef _WIN32_WINDOWS
 #define _WIN32_WINDOWS 0x0410
@@ -20,6 +40,8 @@
 
 #ifndef _WIN32_IE
 #define _WIN32_IE 0x0400
+#endif
+
 #endif
 
 #define _ATL_ATTRIBUTES
