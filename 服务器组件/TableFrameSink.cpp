@@ -1441,9 +1441,6 @@ bool CTableFrameSink::OnUserOperateCard(WORD wChairID, WORD wOperateCode, BYTE c
 			m_wProvideUser = INVALID_CHAIR;
 			m_cbProvideCard = INVAILD_CARD_DATA;
 
- 			//tagGangCardResult gcr;
- 			//m_wUserAction[wTargetUser] |= m_GameLogic.AnalyseGangCardEx(m_cbCardIndex[wTargetUser], m_WeaveItemArray[wTargetUser], m_cbWeaveItemCount[wTargetUser],0, gcr, m_cbOutFromHandCount[wTargetUser]);
-
 			if(m_bTing[wTargetUser] == false)
 			{
 				BYTE cbCount = 0;
@@ -2375,7 +2372,7 @@ bool CTableFrameSink::DispatchCardData(WORD wSendCardUser, bool bTail)
 	SendCard.cbCardData = m_cbSendCardData;
 
 	//荒庄结束
-	if (m_cbLeftCardCount < FENZHANG_COUNT )//2-6码要多留一颗，一码全中不用
+	if (m_cbLeftCardCount < FENZHANG_COUNT )//
 	{
 		m_cbChiHuCard = INVAILD_CARD_DATA;
 		SendCard.wActionMask |= WIK_FEN_ZHANG;
@@ -2432,13 +2429,11 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 		//出牌类型
 		if (EstimatKind == EstimatKind_OutCard )
 		{
-			if( m_bTing[i] ){
-				CChiHuRight chr;
-				BYTE cbWeaveCount = m_cbWeaveItemCount[i];
-				BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
-				m_wUserAction[i] = cbAction;
-			}
-			else {
+			CChiHuRight chr;
+			BYTE cbWeaveCount = m_cbWeaveItemCount[i];
+			BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
+			m_wUserAction[i] = cbAction;
+			if( !m_bTing[i] )
 				//吃碰判断
 				if(!m_bEnjoinChiPeng[i])
 				{
@@ -2467,12 +2462,12 @@ bool CTableFrameSink::EstimateUserRespond(WORD wCenterUser, BYTE cbCenterCard, e
 						m_wUserAction[i] |= m_GameLogic.EstimateGangCard(m_cbCardIndex[i], cbCenterCard);
 					}
 
-					if( m_wUserAction[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) ){
-						CChiHuRight chr;
-						BYTE cbWeaveCount = m_cbWeaveItemCount[i];
-						BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
-						m_wUserAction[i] |= cbAction;
-					}
+					//if( m_wUserAction[i]&(WIK_LEFT|WIK_CENTER|WIK_RIGHT|WIK_PENG) ){
+					//	CChiHuRight chr;
+					//	BYTE cbWeaveCount = m_cbWeaveItemCount[i];
+					//	BYTE cbAction = m_GameLogic.AnalyseChiHuCard(m_cbCardIndex[i], m_WeaveItemArray[i], cbWeaveCount, cbCenterCard, chr);
+					//	m_wUserAction[i] |= cbAction;
+					//}
 				}
 			}
 		}
